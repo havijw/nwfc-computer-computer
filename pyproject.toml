@@ -1,0 +1,7 @@
+[project]
+name = "computer-computer"
+version = "0.1.0"
+dependencies = ["numpy", "pydantic", "scipy"]
+
+[tool.ruff]
+line-length = 100
