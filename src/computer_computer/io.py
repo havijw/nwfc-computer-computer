@@ -25,3 +25,47 @@ def read_courses_tsv(courses_file: Path, teachers: list[Teacher]) -> list[Course
     with courses_file.open(newline="") as csv_file:
         course_reader = csv.DictReader(csv_file, delimiter="\t")
         return [Course.model_validate(row, context={"teachers": teachers}) for row in course_reader]
+
+
+def read_preferences_tsv(
+    preferences_file: Path, students: list[Student], courses: list[Course]
+) -> tuple[dict[Student, list[Course]], dict[Student, list[Course]]]:
+    """Read student course preferences from file.
+
+    Returns:
+        preferences (tuple[dict[Student, Course], dict[Student, Course]]):
+            Tuple containing dictionaries that map students to courses, representing students'
+            first and second choices.
+    """
+    first_choices: dict[Student, list[Course]] = {}
+    second_choices: dict[Student, list[Course]] = {}
+
+    names_to_students = {student.name: student for student in students}
+    titles_to_courses = {course.title: course for course in courses}
+
+    with preferences_file.open(newline="") as csv_file:
+        preferences_reader = csv.DictReader(csv_file, delimiter="\t")
+        for row in preferences_reader:
+            try:
+                student = names_to_students[row["student"]]
+            except KeyError as e:
+                raise ValueError(f"Unrecognized student name: {row['student']}.") from e
+            student_first_choices: list[Course] = []
+            student_second_choices: list[Course] = []
+            for period in range(1, 4):
+                try:
+                    student_first_choices.append(titles_to_courses[row[f"first_choice{period}"]])
+                except KeyError as e:
+                    raise ValueError(
+                        f"Unrecognized course title: {row[f'first_choice{period}']}."
+                    ) from e
+                try:
+                    student_second_choices.append(titles_to_courses[row[f"second_choice{period}"]])
+                except KeyError as e:
+                    raise ValueError(
+                        f"Unrecognized course title: {row[f'second_choice{period}']}."
+                    ) from e
+            first_choices[student] = student_first_choices
+            second_choices[student] = student_second_choices
+
+    return first_choices, second_choices
