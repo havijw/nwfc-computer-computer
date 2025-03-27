@@ -1,13 +1,13 @@
-"""A solver for the problem of scheduling students in courses at a school.
+r"""A solver for the problem of scheduling students in courses at a school.
 
 Formally, this is a linear optimization problem with constraints, i.e., a minimization problem of
 the form
 $$
-    min_x c^\\intercal x
+    min_x c^\intercal x
 $$
 with constraints on $x$ of the form
 $$
-    b_\\ell <= Ax <= b_u.
+    b_\ell <= Ax <= b_u.
 $$
 
 For this specific problem, we have boolean decision variables $x_{sc}$ representing whether student
@@ -15,25 +15,25 @@ $s$ is assigned to course $c$. We impose linear constraints on these decision va
 various real-world constraints.
 - Students must take exactly one course per period:
     $$
-        \\forall s \\forall P \\left[ \\sum_{c \\in P} x_{sc} = 1 \\right]
+        \forall s \forall P \left[ \sum_{c \in P} x_{sc} = 1 \right]
     $$
     where $P$ is the set of all courses in a given period.
 - Each course must have at most 12 students per teacher:
     $$
-        \\forall c \\left[ \\sum_s x_{sc} \\leq 12 \\cdot t_c \\right]
+        \forall c \left[ \sum_s x_{sc} \leq 12 \cdot t_c \right]
     $$
     where $t_c$ is the number of teachers for course $c$.
 - Each student who is a multilingual learner must have a course with an ESL specialist:
     $$
-        \\forall s \\in \\mathrm{ML} \\left[ \\sum_{c \\in C_\\mathrm{ESL}} x_{sc} \\geq 1 \\right]
+        \forall s \in \mathrm{ML} \left[ \sum_{c \in C_\mathrm{ESL}} x_{sc} \geq 1 \right]
     $$
-    where $C_{\\mathrm{ESL}}$ is the set of courses with an ESL specialist.
+    where $C_{\mathrm{ESL}}$ is the set of courses with an ESL specialist.
 
 We also introduce a number of auxiliary variables that are used by the objective function in
 the `get_optimal_course_assignments` method.
 - The enrollment in each course, i.e., the number of students in the course):
     $$
-        \\forall c \\left[ e_c = \\sum_s x_{sc} \\right]
+        \forall c \left[ e_c = \sum_s x_{sc} \right]
     $$
 """
 
@@ -60,7 +60,22 @@ def get_period_groups(courses: Iterable[Course]) -> dict[int, list[Course]]:
 
 
 class ComputerComputerSolver:
-    """Solver for the problem of scheduling students in courses at a school."""
+    r"""Solver for the problem of scheduling students in courses at a school.
+
+    When setting up the linear programming problem, variables are represented as positions in the
+    vector $x$ of the expression $c^\intercalx$ to be minimized.
+
+    Attributes:
+        students (list[Student]): List of students to be placed in courses.
+        courses (list[Course]): List of available courses.
+        decision_variables (dict[tuple[Student, Course], int]): Positions of decision variables
+            representing whether each student is assigned to each course.
+        auxiliary_variables (list[int]): Positions of all auxiliary variables constructed for the
+            objective function.
+        constraints (list[LinearConstraint]): Constraints placed on the optimization problem
+            representing various real-world constraints as well as definitions of auxiliary
+            variables.
+    """
 
     def __init__(self, students: Iterable[Student], courses: Iterable[Course]):
         """Defines the problem with decision and auxiliary variables and linear constraints."""
@@ -79,6 +94,7 @@ class ComputerComputerSolver:
             (student, course): i
             for i, (student, course) in enumerate(product(self.students, self.courses))
         }
+        # See comments in the constraints section to understand each kind of aux variable.
         self.course_size_aux_variables = {
             course: i + len(self.decision_variables) for i, course in enumerate(self.courses)
         }
@@ -138,7 +154,7 @@ class ComputerComputerSolver:
         # Auxiliary variables are linear combinations of other decision variables. We create these
         # definitions as additional linear constraints so they are respected by the optimizer.
 
-        # Aux variable: course size = number of students in each class
+        # Aux variable: course size = # of students assigned to the course
         for course in self.courses:
             definition_coefficients = np.zeros(self._total_variables)
             definition_coefficients[self.course_size_aux_variables[course]] = 1
@@ -146,8 +162,11 @@ class ComputerComputerSolver:
                 definition_coefficients[self.decision_variables[(student, course)]] = -1
             self.constraints.append(LinearConstraint(definition_coefficients, lb=0, ub=0))
 
-        # Aux variable: target number of students per teacher for each period
+        # Aux variable: target students/teacher ratio for all courses in the period
         #               = total students / total teachers in the period
+        # We want students to be evenly distributed among courses, and this variable tells us how
+        # many students each courses should have to achieve that.
+        # Note: these variables do not depend on the decision variables, hence are constant.
         for period, course_group in period_groups.items():
             total_teachers = sum(len(course.teachers) for course in course_group)
             definition_coefficients = np.zeros(self._total_variables)
@@ -162,7 +181,9 @@ class ComputerComputerSolver:
                 )
             )
 
-        # Aux variable: number of students above target = (number of students - target * #teachers) / #teachers
+        # Aux variable: # students above target (for even spread)
+        #               = (# students assigned to course / # teachers for the course)
+        #                   - (target student/teacher ratio)
         for course in self.courses:
             definition_coefficients = np.zeros(self._total_variables)
             definition_coefficients[
@@ -192,6 +213,9 @@ class ComputerComputerSolver:
         """Find the optimal assignment of students to courses given student preferences.
 
         kwargs are passed to `scipy.optimize.milp` as `options`.
+
+        Raises:
+            RuntimeError: If the optimizer fails for any reason (infeasibility is most common).
         """
         # Objective function is designed for maximization problem, but `scipy.optimize.milp` works
         # with minimization problems, so these coefficients need to be made negative when passed
