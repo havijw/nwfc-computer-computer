@@ -1,7 +1,8 @@
 import { PyodideInterface } from "pyodide";
 import { useEffect, useState } from "react";
 
-// TODO remove this if pyodide updates the FS type
+// TODO remove this type if pyodide updates the FS type
+// See https://github.com/pyodide/pyodide/issues/5546
 interface AnalyzePathResult {
   isRoot: boolean;
   exists: boolean;
@@ -33,6 +34,7 @@ export default function usePyodideTextFile(
         parentExists,
         exists: fileExists,
         // TODO remove these disables if Pyodide updates the FS type
+        // See https://github.com/pyodide/pyodide/issues/5546
         // @ts-expect-error Pyodide doesn't have the right signature for FS
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       } = pyodide.FS.analyzePath(normalizedFilePath) as AnalyzePathResult;
