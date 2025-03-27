@@ -1,4 +1,4 @@
-import { defineConfig, searchForWorkspaceRoot } from "vite";
+import { defineConfig, HmrContext, searchForWorkspaceRoot } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { dirname, join } from "path";
@@ -25,11 +25,22 @@ export function viteStaticCopyPyodide() {
   });
 }
 
+export function vitePythonRefresh() {
+  return {
+    name: "full-reload-for-python",
+    handleHotUpdate({ file, server }: HmrContext) {
+      if (file.endsWith(".py")) {
+        server.ws.send({ type: "full-reload" });
+      }
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   // https://pyodide.org/en/latest/usage/working-with-bundlers.html
   optimizeDeps: { exclude: ["pyodide"] },
-  plugins: [react(), viteStaticCopyPyodide()],
+  plugins: [react(), viteStaticCopyPyodide(), vitePythonRefresh()],
   // Server python files in dev. Not needed for production because a wheel is built.
   server: {
     fs: {
