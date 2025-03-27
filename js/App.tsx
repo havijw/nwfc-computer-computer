@@ -45,8 +45,9 @@ export default function App() {
       .then((value) => {
         setPyodide(value);
       })
-      .catch(() => {
-        console.log(`Loading pyodide failed :(`);
+      .catch((reason: unknown) => {
+        console.log("Loading pyodide and necessary packages failed.");
+        console.log(reason);
       });
   }, []);
 
