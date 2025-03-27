@@ -12,7 +12,7 @@ import { PyodideInterface } from "pyodide";
 function FileCard(props: {
   title: string;
   file: File | undefined;
-  setFile: React.Dispatch<React.SetStateAction<File>>;
+  setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
 }) {
   return (
     <Grid size={{ xs: 12, md: 6 }}>
@@ -33,14 +33,21 @@ export default function App() {
   // don't protect it with a ref, it will be run every time the component refreshes (if not using
   // an effect) or every time the component remounts (if using an effect with an empty dependency
   // array). `React.StrictMode` demonstrates the breakage in either case.
+  // TODO remove the disables once I actually start using pyodide
+  // @ts-expect-error I'm not using pyodide yet but I will be soon!
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pyodide, setPyodide] = useState<PyodideInterface>();
   const loadPyodideRun = useRef(false);
   useEffect(() => {
     if (loadPyodideRun.current) return;
     loadPyodideRun.current = true;
-    loadPyodideAndPackages().then((value) => {
-      setPyodide(value);
-    });
+    loadPyodideAndPackages()
+      .then((value) => {
+        setPyodide(value);
+      })
+      .catch(() => {
+        console.log(`Loading pyodide failed :(`);
+      });
   }, []);
 
   return (

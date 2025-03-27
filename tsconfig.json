@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    // https://vite.dev/guide/features#typescript-compiler-options
+    /* https://vite.dev/guide/features#typescript-compiler-options */
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -11,13 +11,20 @@
     ],
     "module": "ESNext",
     "skipLibCheck": true,
+    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    // https://mui.com/material-ui/guides/typescript/
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    /* https://mui.com/material-ui/guides/typescript/ */
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,

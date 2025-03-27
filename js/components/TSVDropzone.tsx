@@ -38,14 +38,23 @@ export default function TSVDropZone({
           <Stack alignItems="center" direction="row" flexGrow={1}>
             <BorderAllIcon />
             <Typography flexGrow={1}>{file.name}</Typography>
-            <IconButton aria-label="delete" onClick={() => setFile(undefined)}>
+            <IconButton
+              aria-label="delete"
+              onClick={() => {
+                setFile(undefined);
+              }}
+            >
               <DeleteIcon />
             </IconButton>
           </Stack>
         </Box>
       ) : (
         <Button variant="outlined" color="info" component="label" sx={styles}>
-          <Dropzone onDrop={(acceptedFiles) => setFile(acceptedFiles[0])}>
+          <Dropzone
+            onDrop={(acceptedFiles) => {
+              setFile(acceptedFiles[0]);
+            }}
+          >
             {({ getRootProps, getInputProps }) => (
               <div {...getRootProps()}>
                 <input {...getInputProps()} />
