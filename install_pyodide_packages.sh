@@ -11,7 +11,7 @@ tar \
   "node_modules/pyodide/pyodide-${PYODIDE_VERSION}.tar.bz2" \
   -C node_modules/pyodide \
   --exclude="*tests*" \
-  pyodide/{numpy,scipy,openblas}*
+  pyodide/{numpy,scipy,openblas,pydantic,annotated_types,typing_extensions}*
 mv node_modules/pyodide/pyodide/* node_modules/pyodide
 echo "Cleaning up extraneous files"
 rm -rf node_modules/pyodide/pyodide

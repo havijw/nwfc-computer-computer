@@ -7,6 +7,6 @@ export default async function loadPyodideAndPackages() {
     `import sys; sys.version.split(" ")[0]`,
   )) as string;
   console.log(`Loaded pyodide with python version ${pyversion}`);
-  await pyodide.loadPackage("scipy");
+  await pyodide.loadPackage(["scipy", "pydantic"]);
   return pyodide;
 }
