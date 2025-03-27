@@ -3,5 +3,37 @@ name = "computer-computer"
 version = "0.1.0"
 dependencies = ["numpy", "pydantic", "scipy"]
 
+[project.optional-dependencies]
+dev = ["mypy", "pytest", "ruff"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "INFO"
+testpaths = ["tests"]
+
 [tool.ruff]
 line-length = 100
+output-format = "full"
+
+[tool.ruff.lint]
+extend-select = [
+  "D",   # pydocstring
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "I",   # isort
+  "UP",  # pyupgrade
+  "W",   # pycodestyle warnings
+  "NPY", # numpy-specific
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]

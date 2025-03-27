@@ -1,0 +1,19 @@
+period	title	subject_areas	teachers
+1	Teacher1's first period	ela	Teacher1
+1	Teacher2's first period	math	Teacher2
+1	Teacher3's first period	science	Teacher3
+1	Teacher4's first period	social_studies	Teacher4
+1	Teacher5's first period	foreign_language	Teacher5
+1	Teacher6's first period	esl	Teacher6
+2	Teacher1's second period	ela	Teacher1
+2	Teacher2's second period	math	Teacher2
+2	Teacher3's second period	science	Teacher3
+2	Teacher4's second period	social_studies	Teacher4
+2	Teacher5's second period	foreign_language	Teacher5
+2	Teacher6's second period	esl	Teacher6
+3	Teacher1's third period	ela	Teacher1
+3	Teacher2's third period	math	Teacher2
+3	Teacher3's third period	science	Teacher3
+3	Teacher4's third period	social_studies	Teacher4
+3	Teacher5's third period	foreign_language	Teacher5
+3	Teacher6's third period	esl	Teacher6
