@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, searchForWorkspaceRoot } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { dirname, join } from "path";
@@ -30,4 +30,10 @@ export default defineConfig({
   // https://pyodide.org/en/latest/usage/working-with-bundlers.html
   optimizeDeps: { exclude: ["pyodide"] },
   plugins: [react(), viteStaticCopyPyodide()],
+  // Server python files in dev. Not needed for production because a wheel is built.
+  server: {
+    fs: {
+      allow: [searchForWorkspaceRoot(process.cwd()), "/python/"],
+    },
+  },
 });

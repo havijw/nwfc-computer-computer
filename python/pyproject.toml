@@ -2,9 +2,15 @@
 name = "computer-computer"
 version = "0.1.0"
 dependencies = ["numpy", "pydantic", "scipy"]
+# Keep in sync with pyodide version
+requires-python = "==3.12.7"
 
 [project.optional-dependencies]
 dev = ["mypy", "pytest", "ruff"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
