@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import { useEffect, useRef, useState } from "react";
 import loadPyodideAndPackages from "./pyodide.ts";
 import { PyodideInterface } from "pyodide";
+import usePyodideTextFile from "./hooks/usePyodideTextFile.ts";
 
 function FileCard(props: {
   title: string;
@@ -22,20 +23,12 @@ function FileCard(props: {
 }
 
 export default function App() {
-  const [studentFile, setStudentFile] = useState<File | undefined>();
-  const [teacherFile, setTeacherFile] = useState<File | undefined>();
-  const [courseFile, setCourseFile] = useState<File | undefined>();
-  const [preferencesFile, setPreferencesFile] = useState<File | undefined>();
-
   // TODO see if I can clean this up with React 19's new `use`
   //      https://stackoverflow.com/a/53572588
   // All this is to prevent `loadPyodide` from running multiple times, which breaks things. If we
   // don't protect it with a ref, it will be run every time the component refreshes (if not using
   // an effect) or every time the component remounts (if using an effect with an empty dependency
   // array). `React.StrictMode` demonstrates the breakage in either case.
-  // TODO remove the disables once I actually start using pyodide
-  // @ts-expect-error I'm not using pyodide yet but I will be soon!
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pyodide, setPyodide] = useState<PyodideInterface>();
   const loadPyodideRun = useRef(false);
   useEffect(() => {
@@ -50,6 +43,20 @@ export default function App() {
         console.log(reason);
       });
   }, []);
+
+  const [studentFile, setStudentFile] = usePyodideTextFile(
+    "/data/students.tsv",
+    pyodide,
+  );
+  const [teacherFile, setTeacherFile] = usePyodideTextFile(
+    "/data/teachers.tsv",
+    pyodide,
+  );
+  const [courseFile, setCourseFile] = usePyodideTextFile("/data/courses.tsv", pyodide);
+  const [preferenceFile, setPreferenceFile] = usePyodideTextFile(
+    "/data/preferences.tsv",
+    pyodide,
+  );
 
   return (
     <>
@@ -79,8 +86,8 @@ export default function App() {
           <FileCard title="Course List" file={courseFile} setFile={setCourseFile} />
           <FileCard
             title="Course Preferences"
-            file={preferencesFile}
-            setFile={setPreferencesFile}
+            file={preferenceFile}
+            setFile={setPreferenceFile}
           />
         </Grid>
       </Container>
