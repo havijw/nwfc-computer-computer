@@ -1,6 +1,8 @@
+import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid2";
+import Stack from "@mui/material/Stack";
 import TSVDropZone from "./components/TSVDropzone";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef, useState } from "react";
@@ -45,7 +47,15 @@ export default function App() {
     <>
       <CssBaseline enableColorScheme />
       <Container component="header" maxWidth="lg" sx={{ paddingY: "1rem" }}>
-        <Typography variant="h5">NWFC Computer-Computer</Typography>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Box
+            component="img"
+            sx={{ height: "2rem" }}
+            alt="Computer-computer logo: a friendly robot"
+            src="/computer-computer-icon.jpg"
+          />
+          <Typography variant="h5">NWFC Computer-Computer</Typography>
+        </Stack>
       </Container>
       <Container
         component="main"
