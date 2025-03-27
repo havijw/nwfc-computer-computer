@@ -1,19 +1,20 @@
 period	title	subject_areas	teachers
-1	Teacher1's first period	ela	Teacher1
-1	Teacher2's first period	math	Teacher2
-1	Teacher3's first period	science	Teacher3
-1	Teacher4's first period	social_studies	Teacher4
-1	Teacher5's first period	foreign_language	Teacher5
-1	Teacher6's first period	esl	Teacher6
-2	Teacher1's second period	ela	Teacher1
-2	Teacher2's second period	math	Teacher2
-2	Teacher3's second period	science	Teacher3
-2	Teacher4's second period	social_studies	Teacher4
-2	Teacher5's second period	foreign_language	Teacher5
-2	Teacher6's second period	esl	Teacher6
-3	Teacher1's third period	ela	Teacher1
-3	Teacher2's third period	math	Teacher2
-3	Teacher3's third period	science	Teacher3
-3	Teacher4's third period	social_studies	Teacher4
-3	Teacher5's third period	foreign_language	Teacher5
-3	Teacher6's third period	esl	Teacher6
+1	Shakespeare	ela,esl	ELATeacher1,ESLTeacher1
+1	Algebra I	math	MathTeacher1
+1	Mission to Mars	science,math	ScienceTeacher1,MathTeacher2
+1	Ice Age	science,ela	ScienceTeacher2,ELATeacher2
+1	US History	social_studies	SSTeacher1
+1	The Environment	social_studies,science	ScienceTeacher3,SSTeacher3
+2	Geometry	math	MathTeacher1
+2	Disasters	social_studies,esl	SSTeacher1,ESLTeacher1
+2	Mission to Mars	science,math	ScienceTeacher1,MathTeacher2
+2	The Crucible	social_studies,ela	SSTeacher2,ELATeacher3
+2	The Book Thief	ela	ELATeacher2
+2	Crime Science	science,social_studies	SSTeacher3,ScienceTeacher3
+2	Pandemics	social_studies,science	SSTeacher2,ScienceTeacher2
+3	Personal Finance	math	MathTeacher1
+3	El Salvador	social_studies	SSTeacher2
+3	Disasters	social_studies,esl	SSTeacher1,ESLTeacher1
+3	Poetry	ela	ELATeacher3
+3	Digital Literacy	social_studies,ela	SSTeacher3,ELATeacher2
+3	Planets and Constellations	science,math	ScienceTeacher1,MathTeacher2
