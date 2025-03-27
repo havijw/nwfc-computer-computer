@@ -15,8 +15,8 @@ export default function TSVDropZone({
   setFile,
 }: {
   title: string;
-  file: File;
-  setFile: React.Dispatch<React.SetStateAction<File>>;
+  file: File | undefined;
+  setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
 }) {
   const styles: SxProps = {
     display: "flex",

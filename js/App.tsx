@@ -3,15 +3,15 @@ import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
-import TSVDropZone from "./components/TSVDropzone";
+import TSVDropZone from "./components/TSVDropzone.tsx";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef, useState } from "react";
-import loadPyodideAndPackages from "./pyodide";
+import loadPyodideAndPackages from "./pyodide.ts";
 import { PyodideInterface } from "pyodide";
 
 function FileCard(props: {
   title: string;
-  file: File;
+  file: File | undefined;
   setFile: React.Dispatch<React.SetStateAction<File>>;
 }) {
   return (
@@ -22,10 +22,10 @@ function FileCard(props: {
 }
 
 export default function App() {
-  const [studentFile, setStudentFile] = useState<File>();
-  const [teacherFile, setTeacherFile] = useState<File>();
-  const [courseFile, setCourseFile] = useState<File>();
-  const [preferencesFile, setPreferencesFile] = useState<File>();
+  const [studentFile, setStudentFile] = useState<File | undefined>();
+  const [teacherFile, setTeacherFile] = useState<File | undefined>();
+  const [courseFile, setCourseFile] = useState<File | undefined>();
+  const [preferencesFile, setPreferencesFile] = useState<File | undefined>();
 
   // TODO see if I can clean this up with React 19's new `use`
   //      https://stackoverflow.com/a/53572588
