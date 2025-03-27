@@ -3,7 +3,9 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid2";
 import TSVDropZone from "./components/TSVDropzone";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import loadPyodideAndPackages from "./pyodide";
+import { PyodideInterface } from "pyodide";
 
 function FileCard(props: {
   title: string;
@@ -22,6 +24,22 @@ export default function App() {
   const [teacherFile, setTeacherFile] = useState<File>();
   const [courseFile, setCourseFile] = useState<File>();
   const [preferencesFile, setPreferencesFile] = useState<File>();
+
+  // TODO see if I can clean this up with React 19's new `use`
+  //      https://stackoverflow.com/a/53572588
+  // All this is to prevent `loadPyodide` from running multiple times, which breaks things. If we
+  // don't protect it with a ref, it will be run every time the component refreshes (if not using
+  // an effect) or every time the component remounts (if using an effect with an empty dependency
+  // array). `React.StrictMode` demonstrates the breakage in either case.
+  const [pyodide, setPyodide] = useState<PyodideInterface>();
+  const loadPyodideRun = useRef(false);
+  useEffect(() => {
+    if (loadPyodideRun.current) return;
+    loadPyodideRun.current = true;
+    loadPyodideAndPackages().then((value) => {
+      setPyodide(value);
+    });
+  }, []);
 
   return (
     <>
