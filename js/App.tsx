@@ -73,21 +73,9 @@ export default function App() {
         }}
       >
         <Grid container spacing={2}>
-          <FileCard
-            title="Student List"
-            file={studentFile}
-            setFile={setStudentFile}
-          />
-          <FileCard
-            title="Teacher List"
-            file={teacherFile}
-            setFile={setTeacherFile}
-          />
-          <FileCard
-            title="Course List"
-            file={courseFile}
-            setFile={setCourseFile}
-          />
+          <FileCard title="Student List" file={studentFile} setFile={setStudentFile} />
+          <FileCard title="Teacher List" file={teacherFile} setFile={setTeacherFile} />
+          <FileCard title="Course List" file={courseFile} setFile={setCourseFile} />
           <FileCard
             title="Course Preferences"
             file={preferencesFile}
@@ -95,10 +83,7 @@ export default function App() {
           />
         </Grid>
       </Container>
-      <Container
-        component="footer"
-        sx={{ textAlign: "center", padding: "0.5rem" }}
-      >
+      <Container component="footer" sx={{ textAlign: "center", padding: "0.5rem" }}>
         &copy;Jack Haviland 2025
       </Container>
     </>

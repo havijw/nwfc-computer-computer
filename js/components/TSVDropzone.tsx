@@ -60,9 +60,7 @@ export default function TSVDropZone({
                 <input {...getInputProps()} />
                 <Stack alignItems="center">
                   <SaveAltIcon />
-                  <Typography>
-                    Drag and drop files or click to select
-                  </Typography>
+                  <Typography>Drag and drop files or click to select</Typography>
                 </Stack>
               </div>
             )}
