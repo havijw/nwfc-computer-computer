@@ -20,15 +20,23 @@ interface AnalyzePathResult {
 export default function usePyodideTextFile(
   filepath: string,
   pyodide: PyodideInterface | undefined,
-): [File | undefined, React.Dispatch<React.SetStateAction<File | undefined>>] {
+): [
+  string,
+  File | undefined,
+  React.Dispatch<React.SetStateAction<File | undefined>>,
+  boolean,
+] {
+  // Break down and normalize file path to ensure it uses "/" as a separator
+  const pathComponents = filepath.split(/[/\\]/); // Guaranteed to have at least one item to pop
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const fileName = pathComponents.pop()!;
+  const fileDirectory = pathComponents.join("/");
+  const normalizedFilePath = [fileDirectory, fileName].join("/");
+
   const [file, setFile] = useState<File | undefined>();
+  const [isFileLoaded, setIsFileLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    const pathComponents = filepath.split(/[/\\]/);
-    const fileName = pathComponents.pop();
-    const fileDirectory = pathComponents.join("/");
-    const normalizedFilePath = [fileDirectory, fileName].join("/");
-
     if (pyodide) {
       const {
         parentExists,
@@ -47,6 +55,7 @@ export default function usePyodideTextFile(
           .text()
           .then((text) => {
             pyodide.FS.writeFile(normalizedFilePath, text);
+            setIsFileLoaded(true);
           })
           .catch((reason: unknown) => {
             throw new Error(
@@ -58,6 +67,7 @@ export default function usePyodideTextFile(
       } else {
         if (fileExists) {
           pyodide.FS.unlink(normalizedFilePath);
+          setIsFileLoaded(false);
           console.log(`Removed file at ${normalizedFilePath}`);
         } else {
           // If pyodide finishes loading and `file` is not set, we need to no-op.
@@ -65,7 +75,7 @@ export default function usePyodideTextFile(
         }
       }
     }
-  }, [filepath, pyodide, file]);
+  }, [pyodide, file, fileDirectory, normalizedFilePath]);
 
-  return [file, setFile];
+  return [normalizedFilePath, file, setFile, isFileLoaded];
 }

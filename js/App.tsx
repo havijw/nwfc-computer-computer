@@ -9,6 +9,9 @@ import { useEffect, useRef, useState } from "react";
 import loadPyodideAndPackages from "./pyodide.ts";
 import { PyodideInterface } from "pyodide";
 import usePyodideTextFile from "./hooks/usePyodideTextFile.ts";
+import { Course, Student } from "./models.ts";
+import { Paper } from "@mui/material";
+import { PyProxy } from "pyodide/ffi";
 
 function FileCard(props: {
   title: string;
@@ -44,19 +47,73 @@ export default function App() {
       });
   }, []);
 
-  const [studentFile, setStudentFile] = usePyodideTextFile(
-    "/data/students.tsv",
+  const [studentFilePath, studentFile, setStudentFile, isStudentFileLoaded] =
+    usePyodideTextFile("/data/students.tsv", pyodide);
+  const [teacherFilePath, teacherFile, setTeacherFile, isTeacherFileLoaded] =
+    usePyodideTextFile("/data/teachers.tsv", pyodide);
+  const [courseFilePath, courseFile, setCourseFile, isCourseFileLoaded] =
+    usePyodideTextFile("/data/courses.tsv", pyodide);
+  const [
+    preferenceFilePath,
+    preferenceFile,
+    setPreferenceFile,
+    isPreferenceFileLoaded,
+  ] = usePyodideTextFile("/data/preferences.tsv", pyodide);
+
+  const [courseAssignments, setCourseAssignments] = useState<[Course, Student[]][]>([]);
+
+  useEffect(() => {
+    // Rerun optimization on updates to files
+    if (
+      pyodide &&
+      [
+        isStudentFileLoaded,
+        isTeacherFileLoaded,
+        isCourseFileLoaded,
+        isPreferenceFileLoaded,
+      ].every(Boolean)
+    ) {
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment, 
+                        @typescript-eslint/no-unsafe-call, 
+                        @typescript-eslint/no-unsafe-member-access */
+      const solverEntrypoint = pyodide.pyimport("computer_computer.file_entrypoint");
+      const assignmentsProxy =
+        solverEntrypoint.get_optimal_course_assignments_from_files(
+          studentFilePath,
+          teacherFilePath,
+          courseFilePath,
+          preferenceFilePath,
+        ) as PyProxy;
+
+      // To avoid memory leaks, don't use proxies
+      // See https://pyodide.org/en/stable/usage/type-conversions.html#type-translations-pyproxy-to-js
+      const assignmentsJS = assignmentsProxy.toJs({
+        create_pyproxies: false,
+        dict_converter: Object.fromEntries,
+      }) as [Course, Student[]][];
+      assignmentsJS.sort(([course1], [course2]) => {
+        if (course1.period !== course2.period) return course1.period - course2.period;
+        else if (course1.title.toUpperCase() < course2.title.toUpperCase()) return -1;
+        else if (course1.title.toUpperCase() > course2.title.toUpperCase()) return 1;
+        return 0;
+      });
+
+      setCourseAssignments(assignmentsJS);
+      assignmentsProxy.destroy();
+    } else {
+      setCourseAssignments([]);
+    }
+  }, [
     pyodide,
-  );
-  const [teacherFile, setTeacherFile] = usePyodideTextFile(
-    "/data/teachers.tsv",
-    pyodide,
-  );
-  const [courseFile, setCourseFile] = usePyodideTextFile("/data/courses.tsv", pyodide);
-  const [preferenceFile, setPreferenceFile] = usePyodideTextFile(
-    "/data/preferences.tsv",
-    pyodide,
-  );
+    studentFilePath,
+    teacherFilePath,
+    courseFilePath,
+    preferenceFilePath,
+    isStudentFileLoaded,
+    isTeacherFileLoaded,
+    isCourseFileLoaded,
+    isPreferenceFileLoaded,
+  ]);
 
   return (
     <>
@@ -90,6 +147,37 @@ export default function App() {
             setFile={setPreferenceFile}
           />
         </Grid>
+        <Paper elevation={3} sx={{ marginTop: "1rem", padding: "0.5rem" }}>
+          {!pyodide ? (
+            <p style={{ textAlign: "center", color: "gray" }}>Pyodide loading...</p>
+          ) : !courseAssignments.length ? (
+            <p style={{ textAlign: "center", color: "gray" }}>
+              Upload files to run solver
+            </p>
+          ) : (
+            <Grid container spacing={1}>
+              {courseAssignments.map(([course, students]) => (
+                <Grid size={3} key={course.title + String(course.period)}>
+                  <Paper sx={{ padding: "0.5rem" }}>
+                    <Box sx={{ typography: "subtitle" }}>
+                      P{course.period}. {course.title}
+                    </Box>
+                    <p style={{ marginTop: "0.25rem", marginBottom: "0.25rem" }}>
+                      <i>{course.teachers.map((teacher) => teacher.name).join(", ")}</i>
+                      <br />
+                      {students.length} students:
+                    </p>
+                    <ul style={{ marginTop: 0 }}>
+                      {students.map((student) => (
+                        <li key={student.name}>{student.name}</li>
+                      ))}
+                    </ul>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Paper>
       </Container>
       <Container component="footer" sx={{ textAlign: "center", padding: "0.5rem" }}>
         &copy;Jack Haviland 2025

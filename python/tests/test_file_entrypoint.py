@@ -4,10 +4,10 @@ from computer_computer.file_entrypoint import get_optimal_course_assignments_fro
 
 
 def test_get_optimal_course_assignments_from_files(data_dir: Path):
-    students_file = data_dir / "students.tsv"
-    teachers_file = data_dir / "teachers.tsv"
-    courses_file = data_dir / "courses.tsv"
-    preferences_file = data_dir / "preferences.tsv"
+    students_file = str(data_dir / "students.tsv")
+    teachers_file = str(data_dir / "teachers.tsv")
+    courses_file = str(data_dir / "courses.tsv")
+    preferences_file = str(data_dir / "preferences.tsv")
 
     assignments = get_optimal_course_assignments_from_files(
         students_file, teachers_file, courses_file, preferences_file
