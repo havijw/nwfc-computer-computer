@@ -38,7 +38,7 @@ the `get_optimal_course_assignments` method.
 """
 
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from itertools import product
 
 import numpy as np
@@ -206,8 +206,8 @@ class ComputerComputerSolver:
 
     def get_optimal_course_assignments(
         self,
-        first_choice_courses: dict[Student, Iterable[Course]],
-        second_choice_courses: dict[Student, Iterable[Course]],
+        first_choice_courses: Mapping[Student, Iterable[Course]],
+        second_choice_courses: Mapping[Student, Iterable[Course]],
         **kwargs,
     ) -> dict[Course, list[Student]]:
         """Find the optimal assignment of students to courses given student preferences.

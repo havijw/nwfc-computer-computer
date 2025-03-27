@@ -130,7 +130,10 @@ class Course(BaseModel):
                 names = value.split(",")
             else:
                 names = [value]
-            teachers_in_context = info.context.get("teachers", [])
+            if info.context is None:
+                teachers_in_context = []
+            else:
+                teachers_in_context = info.context.get("teachers", [])
             teachers_from_names = []
             for name in names:
                 try:

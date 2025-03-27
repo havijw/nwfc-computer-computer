@@ -1,5 +1,6 @@
 """Read collections of models from files."""
 
+from collections.abc import Iterable, Sequence
 import csv
 from pathlib import Path
 
@@ -20,7 +21,7 @@ def read_teachers_tsv(teachers_file: Path) -> list[Teacher]:
         return [Teacher.model_validate(row) for row in teacher_reader]
 
 
-def read_courses_tsv(courses_file: Path, teachers: list[Teacher]) -> list[Course]:
+def read_courses_tsv(courses_file: Path, teachers: Sequence[Teacher]) -> list[Course]:
     """Read a list of courses from a CSV file."""
     with courses_file.open(newline="") as csv_file:
         course_reader = csv.DictReader(csv_file, delimiter="\t")
@@ -28,7 +29,7 @@ def read_courses_tsv(courses_file: Path, teachers: list[Teacher]) -> list[Course
 
 
 def read_preferences_tsv(
-    preferences_file: Path, students: list[Student], courses: list[Course]
+    preferences_file: Path, students: Iterable[Student], courses: Iterable[Course]
 ) -> tuple[dict[Student, list[Course]], dict[Student, list[Course]]]:
     """Read student course preferences from file.
 
