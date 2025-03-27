@@ -14,8 +14,7 @@ export default async function loadPyodideAndPackages() {
   if (import.meta.env.DEV) {
     // This is fragile but I can't think of a better way to do it
     pyodide.FS.mkdirTree("/python/computer_computer/");
-    pyodide.FS.writeFile("/python/computer_computer/__init__.py", "");
-    for (const module of ["io", "models", "solver"]) {
+    for (const module of ["__init__", "io", "file_entrypoint", "models", "solver"]) {
       const response = await fetch(`/python/computer_computer/${module}.py`);
       if (!response.ok) {
         throw new Error(`Failed to load computer_computer.${module}`);
