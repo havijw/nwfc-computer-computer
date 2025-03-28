@@ -102,7 +102,7 @@ class ComputerComputerSolver:
             period: i + len(self.decision_variables) + len(self.course_size_aux_variables)
             for i, period in enumerate(period_groups)
         }
-        self.deviation_from_target_students_per_teacher_aux_variables = {
+        self.course_size_deviation_from_target_aux_variables = {
             course: i
             + len(self.decision_variables)
             + len(self.course_size_aux_variables)
@@ -114,7 +114,7 @@ class ComputerComputerSolver:
             len(self.decision_variables)
             + len(self.course_size_aux_variables)
             + len(self.period_target_students_per_teacher_aux_variables)
-            + len(self.deviation_from_target_students_per_teacher_aux_variables)
+            + len(self.course_size_deviation_from_target_aux_variables)
         )
 
         ############################################################
@@ -181,19 +181,36 @@ class ComputerComputerSolver:
                 )
             )
 
-        # Aux variable: # students above target (for even spread)
-        #               = (# students assigned to course / # teachers for the course)
-        #                   - (target student/teacher ratio)
+        # Aux variable: deviation of # students from the target # of students
+        #               >= ABS(
+        #                         (# students assigned to course)
+        #                         - (# teachers for the course * target student/teacher ratio)
+        #                  )
+        # We linearize the absolute value as two separate constraints, since we can't use
+        # conditionals in constraints. The solver will want to minimize the values of the deviation
+        # variables, so it should assign them the actual absolute value.
+        # NOTE: It is very important that in the objective function, these variables have the
+        # **opposite** sign as the decision variable weights for choices! Otherwise, the above note
+        # will not hold and the problem will be unbounded.
         for course in self.courses:
             definition_coefficients = np.zeros(self._total_variables)
             definition_coefficients[
-                self.deviation_from_target_students_per_teacher_aux_variables[course]
-            ] = len(course.teachers)
+                self.course_size_deviation_from_target_aux_variables[course]
+            ] = 1
+
+            # First constraint: assuming RHS of equation is positive
+            definition_coefficients[self.course_size_aux_variables[course]] = -1
             definition_coefficients[
                 self.period_target_students_per_teacher_aux_variables[course.period]
             ] = len(course.teachers)
-            definition_coefficients[self.course_size_aux_variables[course]] = -1
-            self.constraints.append(LinearConstraint(definition_coefficients, lb=0, ub=0))
+            self.constraints.append(LinearConstraint(definition_coefficients, lb=0))
+
+            # Second constraint: assuming LHS of equation is negative
+            definition_coefficients[self.course_size_aux_variables[course]] = 1
+            definition_coefficients[
+                self.period_target_students_per_teacher_aux_variables[course.period]
+            ] = -len(course.teachers)
+            self.constraints.append(LinearConstraint(definition_coefficients, lb=0))
 
     @property
     def auxiliary_variables(self) -> list[int]:
@@ -201,7 +218,7 @@ class ComputerComputerSolver:
         return (
             list(self.course_size_aux_variables.values())
             + list(self.period_target_students_per_teacher_aux_variables.values())
-            + list(self.deviation_from_target_students_per_teacher_aux_variables.values())
+            + list(self.course_size_deviation_from_target_aux_variables.values())
         )
 
     def get_optimal_course_assignments(
@@ -230,10 +247,10 @@ class ComputerComputerSolver:
             for course in second_choices:
                 objective_function_coefficients[self.decision_variables[(student, course)]] = 1
 
-        # Objective: minimize number of students above target number of students per teacher
+        # Objective: minimize deviation from target ratio of students/teacher
         for course in self.courses:
             objective_function_coefficients[
-                self.deviation_from_target_students_per_teacher_aux_variables[course]
+                self.course_size_deviation_from_target_aux_variables[course]
             ] = -1
 
         # Decision variables are integral; auxiliary variables don't need to be
