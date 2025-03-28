@@ -1,5 +1,6 @@
 import { PyodideInterface } from "pyodide";
 import { useEffect, useState } from "react";
+import { PyodideFileInfo } from "../models";
 
 // TODO remove this type if pyodide updates the FS type
 // See https://github.com/pyodide/pyodide/issues/5546
@@ -21,10 +22,9 @@ export default function usePyodideTextFile(
   filepath: string,
   pyodide: PyodideInterface | undefined,
 ): [
-  string,
+  PyodideFileInfo,
   File | undefined,
   React.Dispatch<React.SetStateAction<File | undefined>>,
-  boolean,
 ] {
   // Break down and normalize file path to ensure it uses "/" as a separator
   const pathComponents = filepath.split(/[/\\]/); // Guaranteed to have at least one item to pop
@@ -77,5 +77,5 @@ export default function usePyodideTextFile(
     }
   }, [pyodide, file, fileDirectory, normalizedFilePath]);
 
-  return [normalizedFilePath, file, setFile, isFileLoaded];
+  return [{ path: normalizedFilePath, isLoaded: isFileLoaded }, file, setFile];
 }

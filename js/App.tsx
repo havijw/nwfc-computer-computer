@@ -12,10 +12,8 @@ import { useEffect, useRef, useState } from "react";
 import loadPyodideAndPackages from "./pyodide.ts";
 import { PyodideInterface } from "pyodide";
 import usePyodideTextFile from "./hooks/usePyodideTextFile.ts";
-import { Course, Student } from "./models.ts";
-import { PyProxy } from "pyodide/ffi";
 import AppTheme from "./theme.tsx";
-import CoursesDisplay from "./components/CoursesDisplay.tsx";
+import CourseAssignmentSolver from "./components/CourseAssignmentSolver.tsx";
 
 function FileCard(props: {
   title: string;
@@ -54,73 +52,22 @@ export default function App() {
       });
   }, []);
 
-  const [studentFilePath, studentFile, setStudentFile, isStudentFileLoaded] =
-    usePyodideTextFile("/data/students.tsv", pyodide);
-  const [teacherFilePath, teacherFile, setTeacherFile, isTeacherFileLoaded] =
-    usePyodideTextFile("/data/teachers.tsv", pyodide);
-  const [courseFilePath, courseFile, setCourseFile, isCourseFileLoaded] =
-    usePyodideTextFile("/data/courses.tsv", pyodide);
-  const [
-    preferenceFilePath,
-    preferenceFile,
-    setPreferenceFile,
-    isPreferenceFileLoaded,
-  ] = usePyodideTextFile("/data/preferences.tsv", pyodide);
-
-  const [courseAssignments, setCourseAssignments] = useState<[Course, Student[]][]>([]);
-
-  useEffect(() => {
-    // Rerun optimization on updates to files
-    if (
-      pyodide &&
-      [
-        isStudentFileLoaded,
-        isTeacherFileLoaded,
-        isCourseFileLoaded,
-        isPreferenceFileLoaded,
-      ].every(Boolean)
-    ) {
-      /* eslint-disable @typescript-eslint/no-unsafe-assignment, 
-                        @typescript-eslint/no-unsafe-call, 
-                        @typescript-eslint/no-unsafe-member-access */
-      const solverEntrypoint = pyodide.pyimport("computer_computer.file_entrypoint");
-      const assignmentsProxy =
-        solverEntrypoint.get_optimal_course_assignments_from_files(
-          studentFilePath,
-          teacherFilePath,
-          courseFilePath,
-          preferenceFilePath,
-        ) as PyProxy;
-
-      // To avoid memory leaks, don't use proxies
-      // See https://pyodide.org/en/stable/usage/type-conversions.html#type-translations-pyproxy-to-js
-      const assignmentsJS = assignmentsProxy.toJs({
-        create_pyproxies: false,
-        dict_converter: Object.fromEntries,
-      }) as [Course, Student[]][];
-      assignmentsJS.sort(([course1], [course2]) => {
-        if (course1.period !== course2.period) return course1.period - course2.period;
-        else if (course1.title.toUpperCase() < course2.title.toUpperCase()) return -1;
-        else if (course1.title.toUpperCase() > course2.title.toUpperCase()) return 1;
-        return 0;
-      });
-
-      setCourseAssignments(assignmentsJS);
-      assignmentsProxy.destroy();
-    } else {
-      setCourseAssignments([]);
-    }
-  }, [
+  const [studentFileInfo, studentFile, setStudentFile] = usePyodideTextFile(
+    "/data/students.tsv",
     pyodide,
-    studentFilePath,
-    teacherFilePath,
-    courseFilePath,
-    preferenceFilePath,
-    isStudentFileLoaded,
-    isTeacherFileLoaded,
-    isCourseFileLoaded,
-    isPreferenceFileLoaded,
-  ]);
+  );
+  const [teacherFileInfo, teacherFile, setTeacherFile] = usePyodideTextFile(
+    "/data/teachers.tsv",
+    pyodide,
+  );
+  const [courseFileInfo, courseFile, setCourseFile] = usePyodideTextFile(
+    "/data/courses.tsv",
+    pyodide,
+  );
+  const [preferenceFileInfo, preferenceFile, setPreferenceFile] = usePyodideTextFile(
+    "/data/preferences.tsv",
+    pyodide,
+  );
 
   return (
     <AppTheme>
@@ -154,12 +101,14 @@ export default function App() {
             setFile={setPreferenceFile}
           />
         </Grid>
-        <CoursesDisplay
-          loadingSolver={!pyodide}
-          waitingForFiles={
-            ![studentFile, teacherFile, courseFile, preferenceFile].every(Boolean)
-          }
-          courseAssignments={courseAssignments}
+        <CourseAssignmentSolver
+          pyodide={pyodide}
+          solverInputFiles={{
+            students: studentFileInfo,
+            teachers: teacherFileInfo,
+            courses: courseFileInfo,
+            preferences: preferenceFileInfo,
+          }}
         />
       </Container>
       <Container component="footer" sx={{ padding: "0.5rem" }}>

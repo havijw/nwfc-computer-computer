@@ -25,3 +25,15 @@ export interface Course {
   subject_areass: SubjectArea[];
   teachers: Teacher[];
 }
+
+export interface PyodideFileInfo {
+  path: string;
+  isLoaded: boolean;
+}
+
+export interface SolverInputFiles {
+  students: PyodideFileInfo;
+  teachers: PyodideFileInfo;
+  courses: PyodideFileInfo;
+  preferences: PyodideFileInfo;
+}
