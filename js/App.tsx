@@ -1,17 +1,20 @@
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
 import TSVDropZone from "./components/TSVDropzone.tsx";
 import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Modal from "@mui/material/Modal";
 import { useEffect, useRef, useState } from "react";
 import loadPyodideAndPackages from "./pyodide.ts";
 import { PyodideInterface } from "pyodide";
 import usePyodideTextFile from "./hooks/usePyodideTextFile.ts";
 import { Course, Student } from "./models.ts";
-import { Paper } from "@mui/material";
 import { PyProxy } from "pyodide/ffi";
+import AppTheme from "./theme.tsx";
 
 function FileCard(props: {
   title: string;
@@ -26,6 +29,9 @@ function FileCard(props: {
 }
 
 export default function App() {
+  // High-level app state
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+
   // TODO see if I can clean this up with React 19's new `use`
   //      https://stackoverflow.com/a/53572588
   // All this is to prevent `loadPyodide` from running multiple times, which breaks things. If we
@@ -116,7 +122,7 @@ export default function App() {
   ]);
 
   return (
-    <>
+    <AppTheme>
       <CssBaseline enableColorScheme />
       <Container component="header" maxWidth="lg" sx={{ paddingY: "1rem" }}>
         <Stack direction="row" alignItems="center" spacing={1}>
@@ -179,9 +185,55 @@ export default function App() {
           )}
         </Paper>
       </Container>
-      <Container component="footer" sx={{ textAlign: "center", padding: "0.5rem" }}>
-        &copy;Jack Haviland 2025
+      <Container component="footer" sx={{ padding: "0.5rem" }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          divider={<span style={{ padding: "0 0.5rem" }}> &middot; </span>}
+        >
+          <Box>
+            &copy;<a href="https://jackhaviland.com">Jack Haviland</a> 2025
+          </Box>
+          <Button
+            sx={{ mx: "-6px" }}
+            onClick={() => {
+              setPrivacyModalOpen(true);
+            }}
+          >
+            Privacy
+          </Button>
+        </Stack>
       </Container>
-    </>
+      {/********** Modals **********/}
+      <Modal
+        open={privacyModalOpen}
+        onClose={() => {
+          setPrivacyModalOpen(false);
+        }}
+        aria-labelledby="privacy-modal-title"
+        aria-describedby="privacy-modal-description"
+      >
+        <Paper
+          sx={{
+            position: "absolute",
+            top: "30%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            p: "1rem",
+          }}
+        >
+          <Typography variant="h6" id="privacy-modal-title">
+            Privacy Policy
+          </Typography>
+          <Typography variant="body1" id="privacy-modal-description">
+            No information is collected or stored, ever. Your files do not leave your
+            computer — you can verify this by loading the page, waiting for the solver
+            to load, turning off your network connection (WiFi), and checking that the
+            solver still runs.
+          </Typography>
+        </Paper>
+      </Modal>
+    </AppTheme>
   );
 }
