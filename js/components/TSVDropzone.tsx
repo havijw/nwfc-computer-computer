@@ -49,23 +49,23 @@ export default function TSVDropZone({
           </Stack>
         </Box>
       ) : (
-        <Button variant="outlined" color="info" component="label" sx={styles}>
-          <Dropzone
-            onDrop={(acceptedFiles) => {
-              setFile(acceptedFiles[0]);
-            }}
-          >
-            {({ getRootProps, getInputProps }) => (
-              <div {...getRootProps()}>
+        <Dropzone
+          onDrop={(acceptedFiles) => {
+            setFile(acceptedFiles[0]);
+          }}
+        >
+          {({ getRootProps, getInputProps }) => (
+            <div {...getRootProps()}>
+              <Button variant="outlined" color="info" component="label" sx={styles}>
                 <input {...getInputProps()} />
                 <Stack alignItems="center">
                   <SaveAltIcon />
                   <Typography>Drag and drop files or click to select</Typography>
                 </Stack>
-              </div>
-            )}
-          </Dropzone>
-        </Button>
+              </Button>
+            </div>
+          )}
+        </Dropzone>
       )}
     </Paper>
   );
