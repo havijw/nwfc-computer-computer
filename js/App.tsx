@@ -13,7 +13,10 @@ import loadPyodideAndPackages from "./pyodide.ts";
 import { PyodideInterface } from "pyodide";
 import usePyodideTextFile from "./hooks/usePyodideTextFile.ts";
 import AppTheme from "./theme.tsx";
-import CourseAssignmentSolver from "./components/CourseAssignmentSolver.tsx";
+import CourseAssignmentSolver, {
+  CourseAssignmentFallbackComponent,
+} from "./components/CourseAssignmentSolver.tsx";
+import { ErrorBoundary } from "react-error-boundary";
 
 function FileCard(props: {
   title: string;
@@ -31,8 +34,8 @@ export default function App() {
   // High-level app state
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
 
-  // TODO see if I can clean this up with React 19's new `use`
-  //      https://stackoverflow.com/a/53572588
+  // TODO Extract the pyodide functionality to a web worker, post messages on file uploads,
+  //      and receive messages on updates to course assignments.
   // All this is to prevent `loadPyodide` from running multiple times, which breaks things. If we
   // don't protect it with a ref, it will be run every time the component refreshes (if not using
   // an effect) or every time the component remounts (if using an effect with an empty dependency
@@ -101,15 +104,17 @@ export default function App() {
             setFile={setPreferenceFile}
           />
         </Grid>
-        <CourseAssignmentSolver
-          pyodide={pyodide}
-          solverInputFiles={{
-            students: studentFileInfo,
-            teachers: teacherFileInfo,
-            courses: courseFileInfo,
-            preferences: preferenceFileInfo,
-          }}
-        />
+        <ErrorBoundary FallbackComponent={CourseAssignmentFallbackComponent}>
+          <CourseAssignmentSolver
+            pyodide={pyodide}
+            solverInputFiles={{
+              students: studentFileInfo,
+              teachers: teacherFileInfo,
+              courses: courseFileInfo,
+              preferences: preferenceFileInfo,
+            }}
+          />
+        </ErrorBoundary>
       </Container>
       <Container component="footer" sx={{ padding: "0.5rem" }}>
         <Stack

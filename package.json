@@ -19,7 +19,8 @@
     "pyodide": "0.27.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-dropzone": "^14.3.8"
+    "react-dropzone": "^14.3.8",
+    "react-error-boundary": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
