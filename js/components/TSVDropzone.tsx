@@ -8,6 +8,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { IconButton, SxProps } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 export default function TSVDropZone({
   title,
@@ -18,12 +19,14 @@ export default function TSVDropZone({
   file: File | undefined;
   setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
 }) {
+  const theme = useTheme();
   const styles: SxProps = {
     display: "flex",
-    color: file ? "black" : "darkgray",
-    bgcolor: "#EEEEEE",
-    border: 1.5,
-    borderColor: "darkgray",
+    color: file ? theme.palette.text.primary : theme.palette.text.secondary,
+    bgcolor:
+      theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[200],
+    border: 2,
+    borderColor: theme.palette.divider,
     borderStyle: "dashed",
     padding: "1rem",
     height: "100%",

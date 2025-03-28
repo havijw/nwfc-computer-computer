@@ -9,7 +9,8 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import prettierConfig from "eslint-config-prettier";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  // If Jupyter is installed, there are .js files in the venv
+  { ignores: ["dist", "python/.venv"] },
   {
     extends: [
       eslint.configs.recommended,

@@ -16,6 +16,9 @@ declare module "@mui/material/styles" {
 }
 
 const theme = createTheme({
+  colorSchemes: {
+    dark: true,
+  },
   typography: {
     button: {
       textTransform: "none",

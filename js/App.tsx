@@ -15,6 +15,7 @@ import usePyodideTextFile from "./hooks/usePyodideTextFile.ts";
 import { Course, Student } from "./models.ts";
 import { PyProxy } from "pyodide/ffi";
 import AppTheme from "./theme.tsx";
+import CoursesDisplay from "./components/CoursesDisplay.tsx";
 
 function FileCard(props: {
   title: string;
@@ -153,37 +154,13 @@ export default function App() {
             setFile={setPreferenceFile}
           />
         </Grid>
-        <Paper elevation={3} sx={{ marginTop: "1rem", padding: "0.5rem" }}>
-          {!pyodide ? (
-            <p style={{ textAlign: "center", color: "gray" }}>Pyodide loading...</p>
-          ) : !courseAssignments.length ? (
-            <p style={{ textAlign: "center", color: "gray" }}>
-              Upload files to run solver
-            </p>
-          ) : (
-            <Grid container spacing={1}>
-              {courseAssignments.map(([course, students]) => (
-                <Grid size={3} key={course.title + String(course.period)}>
-                  <Paper sx={{ padding: "0.5rem" }}>
-                    <Box sx={{ typography: "subtitle" }}>
-                      P{course.period}. {course.title}
-                    </Box>
-                    <p style={{ marginTop: "0.25rem", marginBottom: "0.25rem" }}>
-                      <i>{course.teachers.map((teacher) => teacher.name).join(", ")}</i>
-                      <br />
-                      {students.length} students:
-                    </p>
-                    <ul style={{ marginTop: 0 }}>
-                      {students.map((student) => (
-                        <li key={student.name}>{student.name}</li>
-                      ))}
-                    </ul>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Paper>
+        <CoursesDisplay
+          loadingSolver={!pyodide}
+          waitingForFiles={
+            ![studentFile, teacherFile, courseFile, preferenceFile].every(Boolean)
+          }
+          courseAssignments={courseAssignments}
+        />
       </Container>
       <Container component="footer" sx={{ padding: "0.5rem" }}>
         <Stack
