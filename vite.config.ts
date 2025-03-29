@@ -47,4 +47,8 @@ export default defineConfig({
       allow: [searchForWorkspaceRoot(process.cwd()), "/python/"],
     },
   },
+  base: "/nwfc-computer-computer/",
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+  },
 });

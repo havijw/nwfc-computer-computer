@@ -17,6 +17,7 @@ import CourseAssignmentSolver, {
   CourseAssignmentFallbackComponent,
 } from "./components/CourseAssignmentSolver.tsx";
 import { ErrorBoundary } from "react-error-boundary";
+import logoURL from "/computer-computer-icon.jpg?url";
 
 function FileCard(props: {
   title: string;
@@ -81,7 +82,7 @@ export default function App() {
             component="img"
             sx={{ height: "2rem" }}
             alt="Computer-computer logo: a friendly robot"
-            src="/computer-computer-icon.jpg"
+            src={logoURL}
           />
           <Typography variant="h5">NWFC Computer-Computer</Typography>
         </Stack>

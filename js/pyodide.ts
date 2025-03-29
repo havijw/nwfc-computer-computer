@@ -12,22 +12,31 @@ export default async function loadPyodideAndPackages() {
   console.log("Loading computer_computer");
   // Load computer_computer package either from files (for dev) or from built wheel (for prod)
   if (import.meta.env.DEV) {
-    // This is fragile but I can't think of a better way to do it
     pyodide.FS.mkdirTree("/python/computer_computer/");
-    for (const module of ["__init__", "io", "file_entrypoint", "models", "solver"]) {
-      const response = await fetch(`/python/computer_computer/${module}.py`);
+    // For some reason, import.meta.glob doesn't respect the project base
+    const pythonModules = import.meta.glob("/python/computer_computer/*.py", {
+      query: "?url",
+    });
+    for (const moduleURL in pythonModules) {
+      // String.prototype.split() will never return an empty array
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const moduleName = moduleURL.split("/").pop()!;
+      // import.meta.env.BASE_URL has a trailing "/" and moduleURL has a leading "/"
+      const response = await fetch(import.meta.env.BASE_URL.slice(0, -1) + moduleURL);
       if (!response.ok) {
-        throw new Error(`Failed to load computer_computer.${module}`);
+        throw new Error(`Failed to load computer_computer.${moduleName.slice(0, -3)}`);
       }
       const moduleCode = await response.text();
-      pyodide.FS.writeFile(`/python/computer_computer/${module}.py`, moduleCode);
+      pyodide.FS.writeFile(`/python/computer_computer/${moduleName}`, moduleCode);
     }
     await pyodide.runPythonAsync(`
       import sys
       sys.path.append("/python")
     `);
   } else {
-    await pyodide.loadPackage("/assets/computer_computer-0.1.0-py3-none-any.whl");
+    // TODO surely there's a better, less fragile way to do this
+    const wheelName = `computer_computer-${__APP_VERSION__}-py3-none-any.whl`;
+    await pyodide.loadPackage(`${import.meta.env.BASE_URL}assets/${wheelName}`);
   }
   console.log("Loaded computer_computer");
   return pyodide;
