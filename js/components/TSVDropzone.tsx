@@ -38,7 +38,7 @@ export default function TSVDropZone({
 
   return (
     <Paper elevation={3} sx={{ padding: "0.5rem" }}>
-      <Stack direction="row" alignItems="center">
+      <Stack direction="row" alignItems="center" justifyContent="center" spacing={-0.5}>
         <Typography align="center">{title}</Typography>
         <IconButton onClick={openDescription} aria-label={`Open ${title} description`}>
           <HelpOutlineIcon fontSize="small" />
