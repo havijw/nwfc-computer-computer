@@ -1,13 +1,13 @@
-name	subject_area	num_courses
-ELATeacher1	ela	2
-ELATeacher2	ela	3
-ELATeacher3	ela	2
-MathTeacher1	math	3
-MathTeacher2	math	3
-ScienceTeacher1	science	3
-ScienceTeacher2	science	3
-ScienceTeacher3	science	2
-SSTeacher1	social_studies	3
-SSTeacher2	social_studies	2
-SSTeacher3	social_studies	3
-ESLTeacher1	esl	3
+Name	Subject Area
+ELATeacher1	ela
+ELATeacher2	ela
+ELATeacher3	ela
+MathTeacher1	math
+MathTeacher2	math
+ScienceTeacher1	science
+ScienceTeacher2	science
+ScienceTeacher3	science
+SSTeacher1	social_studies
+SSTeacher2	social_studies
+SSTeacher3	social_studies
+ESLTeacher1	esl

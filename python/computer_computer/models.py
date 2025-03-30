@@ -76,11 +76,11 @@ class Course(BaseModel):
         teachers (list[Teacher]): Teachers teaching the course.
     """
 
-    title: str
-    """The course's title."""
-
     period: int
     """The period during which the course is held."""
+
+    title: str
+    """The course's title."""
 
     subject_areas: list[SubjectArea]
     """Broad subject areas the course covers."""

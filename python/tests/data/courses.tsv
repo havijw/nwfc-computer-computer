@@ -1,4 +1,4 @@
-period	title	subject_areas	teachers
+Period	Title	Subject Area(s)	Teacher(s)
 1	Shakespeare	ela,esl	ELATeacher1,ESLTeacher1
 1	Algebra I	math	MathTeacher1
 1	Mission to Mars	science,math	ScienceTeacher1,MathTeacher2
