@@ -4,6 +4,7 @@ import Paper from "@mui/material/Paper";
 import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import BorderAllIcon from "@mui/icons-material/BorderAll";
 import DeleteIcon from "@mui/icons-material/Delete";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -14,10 +15,12 @@ export default function TSVDropZone({
   title,
   file,
   setFile,
+  openDescription,
 }: {
   title: string;
   file: File | undefined;
   setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
+  openDescription: () => void;
 }) {
   const theme = useTheme();
   const styles: SxProps = {
@@ -35,7 +38,12 @@ export default function TSVDropZone({
 
   return (
     <Paper elevation={3} sx={{ padding: "0.5rem" }}>
-      <Typography align="center">{title}</Typography>
+      <Stack direction="row" alignItems="center">
+        <Typography align="center">{title}</Typography>
+        <IconButton onClick={openDescription} aria-label={`Open ${title} description`}>
+          <HelpOutlineIcon fontSize="small" />
+        </IconButton>
+      </Stack>
       {file ? (
         <Box sx={styles}>
           <Stack alignItems="center" direction="row" flexGrow={1}>

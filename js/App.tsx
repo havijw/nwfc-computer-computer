@@ -18,11 +18,20 @@ import CourseAssignmentSolver, {
 } from "./components/CourseAssignmentSolver.tsx";
 import { ErrorBoundary } from "react-error-boundary";
 import logoURL from "/computer-computer-icon.jpg?url";
+import FileDescriptionModal from "./components/FileDescriptionModal.tsx";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+import Table from "@mui/material/Table";
+import TableContainer from "@mui/material/TableContainer";
+import TableBody from "@mui/material/TableBody";
+import TableHead from "@mui/material/TableHead";
+import { styled, Theme } from "@mui/material/styles";
 
 function FileCard(props: {
   title: string;
   file: File | undefined;
   setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
+  openDescription: () => void;
 }) {
   return (
     <Grid size={{ xs: 12, md: 6 }}>
@@ -31,9 +40,38 @@ function FileCard(props: {
   );
 }
 
+// Table component with dividers between all cells and rounded corners
+const SpreadSheetTable = styled(Table)(({ theme }: { theme: Theme }) => ({
+  borderCollapse: "separate",
+  border: "1px solid",
+  borderColor: theme.palette.divider,
+  borderRadius: theme.shape.borderRadius,
+  overflow: "hidden",
+  "& th": {
+    borderLeft: "1px solid",
+    borderColor: theme.palette.divider,
+    backgroundColor:
+      theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[200],
+  },
+  "& td": {
+    borderLeft: "1px solid",
+    borderColor: theme.palette.divider,
+  },
+  "& tr:last-of-type td": {
+    borderBottom: "none",
+  },
+  "& td:first-of-type, th:first-of-type": {
+    borderLeft: "none",
+  },
+}));
+
 export default function App() {
   // High-level app state
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+  const [studentFileModalOpen, setStudentFileModalOpen] = useState(false);
+  const [teacherFileModalOpen, setTeacherFileModalOpen] = useState(false);
+  const [courseFileModalOpen, setCourseFileModalOpen] = useState(false);
+  const [preferenceFileModalOpen, setPreferenceFileModalOpen] = useState(false);
 
   // TODO Extract the pyodide functionality to a web worker, post messages on file uploads,
   //      and receive messages on updates to course assignments.
@@ -96,13 +134,37 @@ export default function App() {
         }}
       >
         <Grid container spacing={2}>
-          <FileCard title="Student List" file={studentFile} setFile={setStudentFile} />
-          <FileCard title="Teacher List" file={teacherFile} setFile={setTeacherFile} />
-          <FileCard title="Course List" file={courseFile} setFile={setCourseFile} />
+          <FileCard
+            title="Student List"
+            file={studentFile}
+            setFile={setStudentFile}
+            openDescription={() => {
+              setStudentFileModalOpen(true);
+            }}
+          />
+          <FileCard
+            title="Teacher List"
+            file={teacherFile}
+            setFile={setTeacherFile}
+            openDescription={() => {
+              setTeacherFileModalOpen(true);
+            }}
+          />
+          <FileCard
+            title="Course List"
+            file={courseFile}
+            setFile={setCourseFile}
+            openDescription={() => {
+              setCourseFileModalOpen(true);
+            }}
+          />
           <FileCard
             title="Course Preferences"
             file={preferenceFile}
             setFile={setPreferenceFile}
+            openDescription={() => {
+              setPreferenceFileModalOpen(true);
+            }}
           />
         </Grid>
         <ErrorBoundary FallbackComponent={CourseAssignmentFallbackComponent}>
@@ -138,6 +200,7 @@ export default function App() {
         </Stack>
       </Container>
       {/********** Modals **********/}
+      {/* Privacy policy */}
       <Modal
         open={privacyModalOpen}
         onClose={() => {
@@ -166,6 +229,183 @@ export default function App() {
           </Typography>
         </Paper>
       </Modal>
+
+      {/* Student file description */}
+      <FileDescriptionModal
+        open={studentFileModalOpen}
+        onClose={() => {
+          setStudentFileModalOpen(false);
+        }}
+        title="Student list file"
+      >
+        <Typography variant="body1">
+          The student list should be a spreadsheet with the format shown below. The
+          column titles don&apos;t need to be the same, but the columns should be in the
+          same order.
+        </Typography>
+        <TableContainer>
+          <SpreadSheetTable
+            aria-label="student-file-spreadsheet-format"
+            sx={{ borderRadius: 2 }}
+          >
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Is Multilingual Learner?</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>Student1</TableCell>
+                <TableCell>true</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Student2</TableCell>
+                <TableCell>false</TableCell>
+              </TableRow>
+            </TableBody>
+          </SpreadSheetTable>
+        </TableContainer>
+      </FileDescriptionModal>
+
+      {/* Teacher file description */}
+      <FileDescriptionModal
+        open={teacherFileModalOpen}
+        onClose={() => {
+          setTeacherFileModalOpen(false);
+        }}
+        title="Teacher list file"
+      >
+        <Typography variant="body1">
+          The teacher list should be a spreadsheet with the format shown below. The
+          column titles don&apos;t need to be the same, but the columns should be in the
+          same order.
+        </Typography>
+        <TableContainer>
+          <SpreadSheetTable aria-label="teacher-file-spreadsheet-format">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Subject Area</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>Teacher1</TableCell>
+                <TableCell>Math</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Teacher2</TableCell>
+                <TableCell>ESL</TableCell>
+              </TableRow>
+            </TableBody>
+          </SpreadSheetTable>
+        </TableContainer>
+      </FileDescriptionModal>
+
+      {/* Course file description */}
+      <FileDescriptionModal
+        open={courseFileModalOpen}
+        onClose={() => {
+          setCourseFileModalOpen(false);
+        }}
+        title="Course list file"
+      >
+        <Typography variant="body1">
+          The course list file should be a spreadsheet with the format shown below. The
+          column titles don&apos;t need to be the same, but the columns should be in the
+          same order.
+        </Typography>
+        <ul>
+          <li>Teacher names should match the names given in the teacher list.</li>
+        </ul>
+        <TableContainer>
+          <SpreadSheetTable aria-label="teacher-file-spreadsheet-format">
+            <TableHead>
+              <TableRow>
+                <TableCell>Period</TableCell>
+                <TableCell>Title</TableCell>
+                <TableCell>Subject Area(s)</TableCell>
+                <TableCell>Teacher(s)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>1</TableCell>
+                <TableCell>Algebra 1</TableCell>
+                <TableCell>Math</TableCell>
+                <TableCell>Teacher1</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>2</TableCell>
+                <TableCell>Reading Skills</TableCell>
+                <TableCell>ELA,ESL</TableCell>
+                <TableCell>Teacher2</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>3</TableCell>
+                <TableCell>US History</TableCell>
+                <TableCell>Social Studies</TableCell>
+                <TableCell>Teacher3,Teacher4</TableCell>
+              </TableRow>
+            </TableBody>
+          </SpreadSheetTable>
+        </TableContainer>
+      </FileDescriptionModal>
+
+      {/* Preference file description */}
+      <FileDescriptionModal
+        open={preferenceFileModalOpen}
+        onClose={() => {
+          setPreferenceFileModalOpen(false);
+        }}
+        title="Course preferences list file"
+      >
+        <Typography variant="body1">
+          The course list file should be a spreadsheet with the format shown below. The
+          column titles don&apos;t need to be the same, but the columns should be in the
+          same order.
+        </Typography>
+        <ul>
+          <li>Student names should match the names given in the student list.</li>
+          <li>Course titles should match the titles given in the course list.</li>
+        </ul>
+        <TableContainer>
+          <SpreadSheetTable aria-label="preference-file-spreadsheet-format">
+            <TableHead>
+              <TableRow>
+                <TableCell>Student</TableCell>
+                <TableCell>First choice period 1</TableCell>
+                <TableCell>Second choice period 1</TableCell>
+                <TableCell>First choice period 2</TableCell>
+                <TableCell>Second choice period 2</TableCell>
+                <TableCell>First choice period 3</TableCell>
+                <TableCell>Second choice period 3</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>Student1</TableCell>
+                <TableCell>Algebra 1</TableCell>
+                <TableCell>Geography</TableCell>
+                <TableCell>Reading Skills</TableCell>
+                <TableCell>Economics</TableCell>
+                <TableCell>Physics</TableCell>
+                <TableCell>US History</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Student2</TableCell>
+                <TableCell>Astronomy</TableCell>
+                <TableCell>Algebra 1</TableCell>
+                <TableCell>Economics</TableCell>
+                <TableCell>World Literature</TableCell>
+                <TableCell>US History</TableCell>
+                <TableCell>Forensic Science</TableCell>
+              </TableRow>
+            </TableBody>
+          </SpreadSheetTable>
+        </TableContainer>
+      </FileDescriptionModal>
     </AppTheme>
   );
 }
