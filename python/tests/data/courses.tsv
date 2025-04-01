@@ -3,18 +3,18 @@ Period	Title	Subject Area(s)	Teacher(s)
 1	Algebra I	math	MathTeacher1
 1	Mission to Mars	science,math	ScienceTeacher1,MathTeacher2
 1	Ice Age	science,ela	ScienceTeacher2,ELATeacher2
-1	US History	social_studies	SSTeacher1
-1	The Environment	social_studies,science	ScienceTeacher3,SSTeacher3
+1	US History	social studies	SSTeacher1
+1	The Environment	social studies,science	ScienceTeacher3,SSTeacher3
 2	Geometry	math	MathTeacher1
-2	Disasters	social_studies,esl	SSTeacher1,ESLTeacher1
+2	Disasters	social studies,esl	SSTeacher1,ESLTeacher1
 2	Mission to Mars	science,math	ScienceTeacher1,MathTeacher2
-2	The Crucible	social_studies,ela	SSTeacher2,ELATeacher3
+2	The Crucible	social studies,ela	SSTeacher2,ELATeacher3
 2	The Book Thief	ela	ELATeacher2
-2	Crime Science	science,social_studies	SSTeacher3,ScienceTeacher3
-2	Pandemics	social_studies,science	SSTeacher2,ScienceTeacher2
+2	Crime Science	science,social studies	SSTeacher3,ScienceTeacher3
+2	Pandemics	social studies,science	SSTeacher2,ScienceTeacher2
 3	Personal Finance	math	MathTeacher1
-3	El Salvador	social_studies	SSTeacher2
-3	Disasters	social_studies,esl	SSTeacher1,ESLTeacher1
+3	El Salvador	social studies	SSTeacher2
+3	Disasters	social studies,esl	SSTeacher1,ESLTeacher1
 3	Poetry	ela	ELATeacher3
-3	Digital Literacy	social_studies,ela	SSTeacher3,ELATeacher2
+3	Digital Literacy	social studies,ela	SSTeacher3,ELATeacher2
 3	Planets and Constellations	science,math	ScienceTeacher1,MathTeacher2

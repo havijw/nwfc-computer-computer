@@ -1,78 +1,89 @@
 """Read collections of models from files."""
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 import csv
 from pathlib import Path
 
-from computer_computer.models import Course, Student, Teacher
+from computer_computer.models import Course, Student
 
 
-def read_students_tsv(students_file: Path) -> list[Student]:
-    """Read a list of students from a TSV file."""
-    with students_file.open(newline="") as tsv_file:
-        student_reader = csv.reader(tsv_file, delimiter="\t")
-        next(student_reader)  # Skip the header row
-        field_names = list(Student.model_fields)
-        return [Student.model_validate(dict(zip(field_names, row))) for row in student_reader]
+def normalize_str_field(value: str) -> str:
+    """Strip extra whitespace and make the value lowercase."""
+    return value.strip().lower()
 
 
-def read_teachers_tsv(teachers_file: Path) -> list[Teacher]:
-    """Read a list of teachers from a TSV file."""
-    with teachers_file.open(newline="") as tsv_file:
-        teacher_reader = csv.reader(tsv_file, delimiter="\t")
-        next(teacher_reader)  # Skip the header row
-        field_names = list(Teacher.model_fields)
-        return [Teacher.model_validate(dict(zip(field_names, row))) for row in teacher_reader]
+def normalize_tuple_str_field(value: str) -> tuple[str, ...]:
+    """Split list of strings by commas and normalize each value in the list."""
+    all_values = [normalize_str_field(v) for v in value.split(",")]
+    return tuple(v for v in all_values if len(v) > 0)
 
 
-def read_courses_tsv(courses_file: Path, teachers: Sequence[Teacher]) -> list[Course]:
+def read_course_data_from_tsv(course_file: Path) -> list[Course]:
     """Read a list of courses from a TSV file."""
-    with courses_file.open(newline="") as tsv_file:
+    with course_file.open(newline="") as tsv_file:
         course_reader = csv.reader(tsv_file, delimiter="\t")
         next(course_reader)  # Skip the header row
-        field_names = list(Course.model_fields)
-        return [
-            Course.model_validate(dict(zip(field_names, row)), context={"teachers": teachers})
-            for row in course_reader
-        ]
+        courses: list[Course] = []
+        for row in course_reader:
+            if len(row) != len(Course._fields):
+                raise ValueError(
+                    "Row has wrong number of fields\n"
+                    f"Row: {'\t'.join(row)}\n"
+                    f"Expected fields: {Course._fields}"
+                )
+            period_str, title, subject_areas_str, teachers_str = row
+            period = int(period_str)
+            title = normalize_str_field(title)
+            subject_areas = normalize_tuple_str_field(subject_areas_str)
+            teachers = normalize_tuple_str_field(teachers_str)
+            courses.append(
+                Course(period=period, title=title, subject_areas=subject_areas, teachers=teachers)
+            )
+        return courses
 
 
-def read_preferences_tsv(
-    preferences_file: Path, students: Iterable[Student], courses: Iterable[Course]
+def read_student_data_from_tsv(
+    student_file: Path, courses: Iterable[Course]
 ) -> tuple[dict[Student, list[Course]], dict[Student, list[Course]]]:
-    """Read student course preferences from file.
+    """Read list of students with their first and second choice courses for each period.
 
     Returns:
-        preferences (tuple[dict[Student, Course], dict[Student, Course]]):
-            Tuple containing dictionaries that map students to courses, representing students'
-            first and second choices.
+        preferences (tuple[dict[Student, list[Course]], dict[Student, list[Course]]])
+            Tuple containing dictionaries that map students to courses, representing students' first
+            and second choices for each period.
     """
     first_choices: dict[Student, list[Course]] = {}
     second_choices: dict[Student, list[Course]] = {}
 
-    names_to_students = {student.name: student for student in students}
-    titles_to_courses = {course.title: course for course in courses}
+    titles_to_courses = {(course.period, course.title): course for course in courses}
 
-    with preferences_file.open(newline="") as tsv_file:
-        preferences_reader = csv.reader(tsv_file, delimiter="\t")
-        next(preferences_reader)  # Skip the header row
-        for row in preferences_reader:
-            try:
-                student = names_to_students[row[0]]
-            except KeyError as e:
-                raise ValueError(f"Unrecognized student name: {row[0]}.") from e
-            student_first_choices: list[Course] = []
-            student_second_choices: list[Course] = []
-            for period in range(1, (len(row) - 1) // 2 + 1):
+    with student_file.open(newline="") as tsv_file:
+        student_reader = csv.reader(tsv_file, delimiter="\t")
+        next(student_reader)  # Skip the header row
+        for row in student_reader:
+            student_name_str, requirements_str, *preferences = row
+            student_name = normalize_str_field(student_name_str)
+            requirements = normalize_tuple_str_field(requirements_str)
+            student = Student(name=student_name, required_subjects=requirements)
+            first_choices[student] = []
+            second_choices[student] = []
+            for period, (first_choice, second_choice) in enumerate(
+                zip(preferences[::2], preferences[1::2]), start=1
+            ):
                 try:
-                    student_first_choices.append(titles_to_courses[row[period * 2 - 1]])
+                    first_choices[student].append(
+                        titles_to_courses[period, normalize_str_field(first_choice)]
+                    )
                 except KeyError as e:
-                    raise ValueError(f"Unrecognized course title: {row[period * 2 - 1]}.") from e
+                    raise ValueError(
+                        f"Unrecognized course title for period {period}: {first_choice}"
+                    ) from e
                 try:
-                    student_second_choices.append(titles_to_courses[row[period * 2]])
+                    second_choices[student].append(
+                        titles_to_courses[period, normalize_str_field(second_choice)]
+                    )
                 except KeyError as e:
-                    raise ValueError(f"Unrecognized course title: {row[period * 2]}.") from e
-            first_choices[student] = student_first_choices
-            second_choices[student] = student_second_choices
-
-    return first_choices, second_choices
+                    raise ValueError(
+                        f"Unrecognized course title for period {period}: {second_choice}"
+                    ) from e
+        return first_choices, second_choices

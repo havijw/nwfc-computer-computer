@@ -1,53 +1,42 @@
 from pathlib import Path
 
+import pytest
+
 from computer_computer.io import (
-    read_courses_tsv,
-    read_preferences_tsv,
-    read_students_tsv,
-    read_teachers_tsv,
+    normalize_tuple_str_field,
+    read_course_data_from_tsv,
+    read_student_data_from_tsv,
 )
-from computer_computer.models import Course, Student, SubjectArea, Teacher
 
 
-def test_read_students_tsv(data_dir: Path):
-    students = read_students_tsv(data_dir / "students.tsv")
-    assert len(students) > 0
-    for student in students:
-        assert isinstance(student, Student)
-        assert len(student.name) > 0
-    assert any(student.is_multilingual_learner for student in students)
+@pytest.mark.parametrize(
+    "input",
+    ["a,b,,c", ",,a,b", "a,b,", " , "],
+)
+def test_normalize_tuple_str_field(input: str):
+    # Mostly making sure no whitespace-only strings get through
+    for value in normalize_tuple_str_field(input):
+        assert len(value) > 0
 
 
-def test_read_teachers_tsv(data_dir: Path):
-    teachers = read_teachers_tsv(data_dir / "teachers.tsv")
-    assert len(teachers) > 0
-    for teacher in teachers:
-        assert isinstance(teacher, Teacher)
-        assert len(teacher.name) > 0
-        assert isinstance(teacher.subject_area, SubjectArea)
-
-
-def test_read_courses_tsv(data_dir: Path):
-    teachers = read_teachers_tsv(data_dir / "teachers.tsv")
-    courses = read_courses_tsv(data_dir / "courses.tsv", teachers=teachers)
+def test_read_course_data_from_tsv(data_dir: Path):
+    courses = read_course_data_from_tsv(data_dir / "courses.tsv")
     assert len(courses) > 0
     for course in courses:
-        assert isinstance(course, Course)
-        assert len(course.title) > 0
         assert len(course.subject_areas) > 0
         assert len(course.teachers) > 0
-        assert len(course.teachers) > 0
 
 
-def test_read_preferences_tsv(data_dir: Path):
-    students = read_students_tsv(data_dir / "students.tsv")
-    teachers = read_teachers_tsv(data_dir / "teachers.tsv")
-    courses = read_courses_tsv(data_dir / "courses.tsv", teachers=teachers)
-    first_preferences, second_preferences = read_preferences_tsv(
-        data_dir / "preferences.tsv", students=students, courses=courses
+def test_read_student_data_from_tsv(data_dir: Path):
+    courses = read_course_data_from_tsv(data_dir / "courses.tsv")
+    first_choices, second_choices = read_student_data_from_tsv(
+        data_dir / "preferences.tsv", courses=courses
     )
-    for student in students:
-        assert student in first_preferences
-        assert len(first_preferences[student]) == 3
-        assert student in second_preferences
-        assert len(second_preferences[student]) == 3
+    assert len(first_choices) > 0
+    assert len(second_choices) > 0
+    for student in first_choices:
+        assert student in second_choices
+        assert len(first_choices[student]) == 3
+    for student in second_choices:
+        assert student in first_choices
+        assert len(second_choices[student]) == 3

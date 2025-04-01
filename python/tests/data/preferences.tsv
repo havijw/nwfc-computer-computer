@@ -1,51 +1,51 @@
-Student	First Choice Period 1	Second Choice Period 1	First Choice Period 2	Second Choice Period 2	First Choice Period 3	Second Choice Period 3
-Student1	Shakespeare	Ice Age	Pandemics	Geometry	Planets and Constellations	Poetry
-Student2	US History	The Environment	Geometry	Crime Science	Poetry	Digital Literacy
-Student3	Shakespeare	US History	Pandemics	Geometry	Disasters	El Salvador
-Student4	Shakespeare	US History	Mission to Mars	The Book Thief	Personal Finance	Disasters
-Student5	Algebra I	Mission to Mars	Mission to Mars	Disasters	El Salvador	Poetry
-Student6	Shakespeare	Mission to Mars	Crime Science	Geometry	Poetry	El Salvador
-Student7	The Environment	Ice Age	Mission to Mars	Pandemics	Disasters	Planets and Constellations
-Student8	Ice Age	Mission to Mars	Mission to Mars	Geometry	El Salvador	Personal Finance
-Student9	The Environment	Ice Age	The Book Thief	Disasters	Personal Finance	Poetry
-Student10	Algebra I	Mission to Mars	Geometry	The Crucible	El Salvador	Digital Literacy
-Student11	US History	Shakespeare	Mission to Mars	Geometry	Disasters	Poetry
-Student12	Mission to Mars	US History	Pandemics	The Crucible	Personal Finance	Planets and Constellations
-Student13	US History	Algebra I	Geometry	The Crucible	El Salvador	Personal Finance
-Student14	Ice Age	Shakespeare	The Crucible	Mission to Mars	Disasters	El Salvador
-Student15	The Environment	Shakespeare	Crime Science	The Crucible	Poetry	El Salvador
-Student16	Algebra I	US History	The Book Thief	Mission to Mars	Digital Literacy	El Salvador
-Student17	US History	Algebra I	Mission to Mars	Pandemics	Planets and Constellations	Personal Finance
-Student18	Algebra I	Shakespeare	Disasters	Geometry	Digital Literacy	Poetry
-Student19	Ice Age	US History	Pandemics	Crime Science	Disasters	Personal Finance
-Student20	Ice Age	Mission to Mars	Crime Science	Pandemics	Disasters	Planets and Constellations
-Student21	Mission to Mars	The Environment	Disasters	Crime Science	Personal Finance	Poetry
-Student22	Algebra I	Shakespeare	Crime Science	Pandemics	El Salvador	Digital Literacy
-Student23	Ice Age	The Environment	Pandemics	The Crucible	Disasters	El Salvador
-Student24	Mission to Mars	Ice Age	Crime Science	The Crucible	El Salvador	Disasters
-Student25	Ice Age	Shakespeare	The Crucible	Mission to Mars	Disasters	Poetry
-Student26	Ice Age	US History	Mission to Mars	Crime Science	Poetry	Disasters
-Student27	Algebra I	The Environment	Crime Science	The Book Thief	Digital Literacy	Disasters
-Student28	Shakespeare	Mission to Mars	The Book Thief	Mission to Mars	El Salvador	Personal Finance
-Student29	Shakespeare	Ice Age	Pandemics	The Crucible	Poetry	Planets and Constellations
-Student30	Shakespeare	Algebra I	Crime Science	Disasters	Disasters	Poetry
-Student31	US History	Algebra I	Mission to Mars	Disasters	Planets and Constellations	Personal Finance
-Student32	Shakespeare	Mission to Mars	Disasters	Geometry	Disasters	El Salvador
-Student33	Algebra I	Ice Age	Mission to Mars	The Crucible	Disasters	Personal Finance
-Student34	Mission to Mars	Ice Age	Pandemics	The Crucible	El Salvador	Personal Finance
-Student35	Shakespeare	Algebra I	Crime Science	The Book Thief	Poetry	Disasters
-Student36	Shakespeare	US History	The Book Thief	Crime Science	Poetry	Planets and Constellations
-Student37	The Environment	Ice Age	The Crucible	Geometry	Digital Literacy	Poetry
-Student38	Mission to Mars	Algebra I	Disasters	Crime Science	Disasters	El Salvador
-Student39	Algebra I	Shakespeare	Pandemics	Disasters	Planets and Constellations	El Salvador
-Student40	Shakespeare	Mission to Mars	Disasters	Mission to Mars	Digital Literacy	Personal Finance
-Student41	Shakespeare	Ice Age	Pandemics	Disasters	Planets and Constellations	Poetry
-Student42	Ice Age	US History	Geometry	Mission to Mars	El Salvador	Digital Literacy
-Student43	US History	Mission to Mars	Mission to Mars	Geometry	El Salvador	Poetry
-Student44	Shakespeare	Mission to Mars	Crime Science	Pandemics	El Salvador	Digital Literacy
-Student45	Ice Age	Shakespeare	The Book Thief	Disasters	Planets and Constellations	Disasters
-Student46	Shakespeare	The Environment	Geometry	The Book Thief	Personal Finance	Digital Literacy
-Student47	The Environment	Algebra I	Disasters	Geometry	Digital Literacy	Disasters
-Student48	US History	The Environment	Mission to Mars	The Book Thief	El Salvador	Poetry
-Student49	Ice Age	Shakespeare	Geometry	The Book Thief	Personal Finance	Digital Literacy
-Student50	Mission to Mars	US History	The Crucible	Mission to Mars	Disasters	Digital Literacy
+Student	Required Subject Area(s)	First Choice Period 1	Second Choice Period 1	First Choice Period 2	Second Choice Period 2	First Choice Period 3	Second Choice Period 3
+Student1	ESL	Shakespeare	Ice Age	Pandemics	Geometry	Planets and Constellations	Poetry
+Student2	ESL	US History	The Environment	Geometry	Crime Science	Poetry	Digital Literacy
+Student3	ESL	Shakespeare	US History	Pandemics	Geometry	Disasters	El Salvador
+Student4	ESL	Shakespeare	US History	Mission to Mars	The Book Thief	Personal Finance	Disasters
+Student5	ESL	Algebra I	Mission to Mars	Mission to Mars	Disasters	El Salvador	Poetry
+Student6	ESL	Shakespeare	Mission to Mars	Crime Science	Geometry	Poetry	El Salvador
+Student7	ESL	The Environment	Ice Age	Mission to Mars	Pandemics	Disasters	Planets and Constellations
+Student8	ESL	Ice Age	Mission to Mars	Mission to Mars	Geometry	El Salvador	Personal Finance
+Student9	ESL	The Environment	Ice Age	The Book Thief	Disasters	Personal Finance	Poetry
+Student10	ESL	Algebra I	Mission to Mars	Geometry	The Crucible	El Salvador	Digital Literacy
+Student11		US History	Shakespeare	Mission to Mars	Geometry	Disasters	Poetry
+Student12		Mission to Mars	US History	Pandemics	The Crucible	Personal Finance	Planets and Constellations
+Student13		US History	Algebra I	Geometry	The Crucible	El Salvador	Personal Finance
+Student14		Ice Age	Shakespeare	The Crucible	Mission to Mars	Disasters	El Salvador
+Student15		The Environment	Shakespeare	Crime Science	The Crucible	Poetry	El Salvador
+Student16		Algebra I	US History	The Book Thief	Mission to Mars	Digital Literacy	El Salvador
+Student17		US History	Algebra I	Mission to Mars	Pandemics	Planets and Constellations	Personal Finance
+Student18		Algebra I	Shakespeare	Disasters	Geometry	Digital Literacy	Poetry
+Student19		Ice Age	US History	Pandemics	Crime Science	Disasters	Personal Finance
+Student20		Ice Age	Mission to Mars	Crime Science	Pandemics	Disasters	Planets and Constellations
+Student21		Mission to Mars	The Environment	Disasters	Crime Science	Personal Finance	Poetry
+Student22		Algebra I	Shakespeare	Crime Science	Pandemics	El Salvador	Digital Literacy
+Student23		Ice Age	The Environment	Pandemics	The Crucible	Disasters	El Salvador
+Student24		Mission to Mars	Ice Age	Crime Science	The Crucible	El Salvador	Disasters
+Student25		Ice Age	Shakespeare	The Crucible	Mission to Mars	Disasters	Poetry
+Student26		Ice Age	US History	Mission to Mars	Crime Science	Poetry	Disasters
+Student27		Algebra I	The Environment	Crime Science	The Book Thief	Digital Literacy	Disasters
+Student28		Shakespeare	Mission to Mars	The Book Thief	Mission to Mars	El Salvador	Personal Finance
+Student29		Shakespeare	Ice Age	Pandemics	The Crucible	Poetry	Planets and Constellations
+Student30		Shakespeare	Algebra I	Crime Science	Disasters	Disasters	Poetry
+Student31		US History	Algebra I	Mission to Mars	Disasters	Planets and Constellations	Personal Finance
+Student32		Shakespeare	Mission to Mars	Disasters	Geometry	Disasters	El Salvador
+Student33		Algebra I	Ice Age	Mission to Mars	The Crucible	Disasters	Personal Finance
+Student34		Mission to Mars	Ice Age	Pandemics	The Crucible	El Salvador	Personal Finance
+Student35		Shakespeare	Algebra I	Crime Science	The Book Thief	Poetry	Disasters
+Student36		Shakespeare	US History	The Book Thief	Crime Science	Poetry	Planets and Constellations
+Student37		The Environment	Ice Age	The Crucible	Geometry	Digital Literacy	Poetry
+Student38		Mission to Mars	Algebra I	Disasters	Crime Science	Disasters	El Salvador
+Student39		Algebra I	Shakespeare	Pandemics	Disasters	Planets and Constellations	El Salvador
+Student40		Shakespeare	Mission to Mars	Disasters	Mission to Mars	Digital Literacy	Personal Finance
+Student41		Shakespeare	Ice Age	Pandemics	Disasters	Planets and Constellations	Poetry
+Student42		Ice Age	US History	Geometry	Mission to Mars	El Salvador	Digital Literacy
+Student43		US History	Mission to Mars	Mission to Mars	Geometry	El Salvador	Poetry
+Student44		Shakespeare	Mission to Mars	Crime Science	Pandemics	El Salvador	Digital Literacy
+Student45		Ice Age	Shakespeare	The Book Thief	Disasters	Planets and Constellations	Disasters
+Student46		Shakespeare	The Environment	Geometry	The Book Thief	Personal Finance	Digital Literacy
+Student47		The Environment	Algebra I	Disasters	Geometry	Digital Literacy	Disasters
+Student48		US History	The Environment	Mission to Mars	The Book Thief	El Salvador	Poetry
+Student49		Ice Age	Shakespeare	Geometry	The Book Thief	Personal Finance	Digital Literacy
+Student50		Mission to Mars	US History	The Crucible	Mission to Mars	Disasters	Digital Literacy
