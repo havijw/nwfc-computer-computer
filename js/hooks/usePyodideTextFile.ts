@@ -1,6 +1,14 @@
 import { PyodideInterface } from "pyodide";
 import { useEffect, useState } from "react";
-import { PyodideFileInfo } from "../models";
+
+/** Information about a Pyodide file controlled by the `usePyodideTextFile` hook.  */
+export interface PyodideFileInfo {
+  /** Path to the file in Pyodide's file system. */
+  path: string;
+
+  /** Whether the file is currently loaded in Pyodide's file system. */
+  isLoaded: boolean;
+}
 
 // TODO remove this type if pyodide updates the FS type
 // See https://github.com/pyodide/pyodide/issues/5546
@@ -18,6 +26,18 @@ interface AnalyzePathResult {
   parentObject: any;
 }
 
+/** React hook to synchronize a state file object with a location in Pyodide's file system.
+ *
+ * Changes to the state file object are reflected in Pyodide's file system, but not vice-versa.
+ *
+ * @param filepath The path where the file should be loaded in Pyodide's file system.
+ * @param pyodide The Pyodide instance with the file system where the file should be loaded.
+ *
+ * @returns Array with three objects:
+ *   - `PyodideFileInfo`: Information about the file in Pyodide's file system.
+ *   - `File`: State whose changes will be reflected in Pyodide's file system.
+ *   - `(file: File) => void`: Function to update the state `File` object.
+ */
 export default function usePyodideTextFile(
   filepath: string,
   pyodide: PyodideInterface | undefined,

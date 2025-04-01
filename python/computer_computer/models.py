@@ -8,24 +8,26 @@ class Student(NamedTuple):
 
     Attributes:
         name (str): The student's name. Assumed to be unique.
-        requires_subjects (list[str]): Subject areas the student must take at least one course in.
+        requires_subjects (tuple[str, ...]): Subject areas in which the student must take a course.
     """
 
     name: str
     """The student's name. Assumed to be unique."""
 
     required_subjects: tuple[str, ...]
-    """Subject areas the student must take at least one course in."""
+    """Subject areas in which the student must take a course."""
 
 
 class Course(NamedTuple):
     """Represents a course.
 
+    The period and title attributes are assumed to uniquely identify a course.
+
     Attributes:
-        title (str): The title of the course.
         period (int): The period during which the course is held.
-        subject_areas (list[str]): Broad subject areas the course covers.
-        teachers (list[str]): Teachers teaching the course.
+        title (str): The title of the course.
+        subject_areas (tuple[str, ...]): Subject areas the course covers.
+        teachers (tuple[str, ...]): Names ot teachers who teach the course
     """
 
     period: int

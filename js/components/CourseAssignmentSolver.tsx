@@ -1,23 +1,34 @@
-import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid2";
-import Box from "@mui/material/Box";
-import { useTheme } from "@mui/material/styles";
-import { Course, SolverInputFiles, Student } from "../models";
-import { PyodideInterface } from "pyodide";
 import { useEffect, useState } from "react";
-import { PyProxy } from "pyodide/ffi";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
-import { Accordion, AccordionDetails, AccordionSummary, Stack } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-export function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Grid from "@mui/material/Grid2";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import { useTheme } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import { PyodideInterface } from "pyodide";
+import { PyProxy } from "pyodide/ffi";
+import { ErrorBoundary } from "react-error-boundary";
+
+import type { Course, Student } from "../models";
+import type { PyodideFileInfo } from "../hooks/usePyodideTextFile";
+
+/** Fallback component for error state of `CourseAssignment` component.
+ *
+ * @param props
+ * @param props.error Error object with message to display
+ */
+function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
   const theme = useTheme();
   return (
     <Paper
       elevation={3}
       sx={{
-        marginTop: "1rem",
         padding: "0.5rem",
         border: 1,
         borderColor: theme.palette.error.light,
@@ -52,7 +63,7 @@ export function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
             <Typography sx={{ fontWeight: "bold" }}>Full Error</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Typography>
+            <Typography sx={{ overflow: "scroll" }}>
               <pre>{error.message}</pre>
             </Typography>
           </AccordionDetails>
@@ -62,16 +73,38 @@ export function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
   );
 }
 
-export default function CourseAssignmentSolver({
+/** Information about data files used by the solver. */
+export interface SolverInputFiles {
+  /** Course data file information. */
+  courses: PyodideFileInfo;
+
+  /** Student data file information. */
+  students: PyodideFileInfo;
+}
+
+/** Props for the `CourseAssignmentSolver` component. */
+interface CourseAssignmentSolverProps {
+  /** Pyodide instance with all necessary packages loaded.
+   *
+   * Should be React state and `undefined` until ready.
+   */
+  pyodide: PyodideInterface | undefined;
+
+  /** Information about data files used by the solver. */
+  solverInputFiles: SolverInputFiles;
+}
+
+/** Base component for course assignment solving with Pyodide.
+ *
+ * Meant to be wrapped in an error boundary.
+ */
+function CourseAssignmentSolverBase({
   pyodide,
   solverInputFiles: { students: studentFileInfo, courses: courseFileInfo },
-}: {
-  pyodide: PyodideInterface | undefined;
-  solverInputFiles: SolverInputFiles;
-}) {
+}: CourseAssignmentSolverProps) {
   const theme = useTheme();
   const [courseAssignments, setCourseAssignments] = useState<[Course, Student[]][]>([]);
-  // Bring error handling from effect to main component
+  // Bring error handling from effect to main component for error boundary
   const [pyodideError, setPyodideError] = useState<unknown>();
   if (pyodideError) throw pyodideError as Error;
 
@@ -122,11 +155,11 @@ export default function CourseAssignmentSolver({
   }, [pyodide, allFilesLoaded, courseFileInfo, studentFileInfo]);
 
   return (
-    <Paper elevation={3} sx={{ marginTop: "1rem", padding: "0.5rem" }}>
+    <Paper elevation={3} sx={{ padding: "0.5rem" }}>
       {courseAssignments.length ? (
         <Grid container spacing={1}>
           {courseAssignments.map(([course, students]) => (
-            <Grid size={3} key={course.title + String(course.period)}>
+            <Grid size={{ xs: 6, md: 3 }} key={course.title + String(course.period)}>
               <Paper sx={{ padding: "0.5rem" }}>
                 <Box sx={{ typography: "subtitle" }}>
                   P{course.period}. {course.title}
@@ -160,5 +193,14 @@ export default function CourseAssignmentSolver({
         </Box>
       )}
     </Paper>
+  );
+}
+
+/** Course assignment solver component with error boundary. */
+export default function CourseAssignmentSolver(props: CourseAssignmentSolverProps) {
+  return (
+    <ErrorBoundary FallbackComponent={CourseAssignmentFallbackComponent}>
+      <CourseAssignmentSolverBase {...props} />
+    </ErrorBoundary>
   );
 }

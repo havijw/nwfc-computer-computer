@@ -1,5 +1,9 @@
 import { loadPyodide } from "pyodide";
 
+/** Asynchronously loads Pyodide and all required packages.
+ *
+ * @returns The loaded Pyodide instance with all required packages.
+ */
 export default async function loadPyodideAndPackages() {
   console.log("Loading pyodide");
   const pyodide = await loadPyodide();

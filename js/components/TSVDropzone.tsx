@@ -1,29 +1,48 @@
-import Button from "@mui/material/Button";
-import Dropzone from "react-dropzone";
-import Paper from "@mui/material/Paper";
-import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import BorderAllIcon from "@mui/icons-material/BorderAll";
 import DeleteIcon from "@mui/icons-material/Delete";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import Box from "@mui/material/Box";
-import { IconButton, SxProps } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import { useTheme, SxProps } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import Dropzone from "react-dropzone";
 
+/** Props for the `TSVDropZone` component. */
+interface TSVDropZoneProps {
+  /** Displayed title for the component. */
+  title: string;
+
+  /** File object updated by the component.
+   *
+   * Should be React state along with the `setFile` function prop.
+   * Used by component to change appearance when a file has been uploaded.
+   */
+  file: File | undefined;
+
+  /** Update function for the file object of the component.
+   *
+   * Should come from React state along with the `file` prop.
+   */
+  setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
+
+  /** Function that opens a (modal) description of the file the component expects. */
+  openDescription: () => void;
+}
+
+/** Component with a file upload drop zone meant to work with React state. */
 export default function TSVDropZone({
   title,
   file,
   setFile,
   openDescription,
-}: {
-  title: string;
-  file: File | undefined;
-  setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
-  openDescription: () => void;
-}) {
+}: TSVDropZoneProps) {
   const theme = useTheme();
-  const styles: SxProps = {
+  const dropzoneStyles: SxProps = {
+    height: "5rem",
     display: "flex",
     color: file ? theme.palette.text.primary : theme.palette.text.secondary,
     bgcolor:
@@ -32,7 +51,6 @@ export default function TSVDropZone({
     borderColor: theme.palette.divider,
     borderStyle: "dashed",
     padding: "1rem",
-    height: "100%",
     borderRadius: "0.25rem",
   };
 
@@ -45,7 +63,7 @@ export default function TSVDropZone({
         </IconButton>
       </Stack>
       {file ? (
-        <Box sx={styles}>
+        <Box sx={dropzoneStyles}>
           <Stack alignItems="center" direction="row" flexGrow={1}>
             <BorderAllIcon />
             <Typography flexGrow={1}>{file.name}</Typography>
@@ -67,7 +85,12 @@ export default function TSVDropZone({
         >
           {({ getRootProps, getInputProps }) => (
             <div {...getRootProps()}>
-              <Button variant="outlined" color="info" component="label" sx={styles}>
+              <Button
+                variant="outlined"
+                color="info"
+                component="label"
+                sx={dropzoneStyles}
+              >
                 <input {...getInputProps()} />
                 <Stack alignItems="center">
                   <SaveAltIcon />
