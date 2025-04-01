@@ -13,7 +13,7 @@ from computer_computer.io import (
     "input",
     ["a,b,,c", ",,a,b", "a,b,", " , "],
 )
-def test_normalize_tuple_str_field(input: str):
+def test_split_tuple_str_field(input: str):
     # Mostly making sure no whitespace-only strings get through
     for value in normalize_tuple_str_field(input):
         assert len(value) > 0
@@ -21,6 +21,7 @@ def test_normalize_tuple_str_field(input: str):
 
 def test_read_course_data_from_tsv(data_dir: Path):
     courses = read_course_data_from_tsv(data_dir / "courses.tsv")
+    print(courses)
     assert len(courses) > 0
     for course in courses:
         assert len(course.subject_areas) > 0

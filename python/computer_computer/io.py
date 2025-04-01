@@ -9,7 +9,7 @@ from computer_computer.models import Course, Student
 
 def normalize_str_field(value: str) -> str:
     """Strip extra whitespace and make the value lowercase."""
-    return value.strip().lower()
+    return value.strip()
 
 
 def normalize_tuple_str_field(value: str) -> tuple[str, ...]:
@@ -34,7 +34,7 @@ def read_course_data_from_tsv(course_file: Path) -> list[Course]:
             period_str, title, subject_areas_str, teachers_str = row
             period = int(period_str)
             title = normalize_str_field(title)
-            subject_areas = normalize_tuple_str_field(subject_areas_str)
+            subject_areas = tuple(a.upper() for a in normalize_tuple_str_field(subject_areas_str))
             teachers = normalize_tuple_str_field(teachers_str)
             courses.append(
                 Course(period=period, title=title, subject_areas=subject_areas, teachers=teachers)
@@ -55,7 +55,7 @@ def read_student_data_from_tsv(
     first_choices: dict[Student, list[Course]] = {}
     second_choices: dict[Student, list[Course]] = {}
 
-    titles_to_courses = {(course.period, course.title): course for course in courses}
+    titles_to_courses = {(course.period, course.title.lower()): course for course in courses}
 
     with student_file.open(newline="") as tsv_file:
         student_reader = csv.reader(tsv_file, delimiter="\t")
@@ -63,7 +63,7 @@ def read_student_data_from_tsv(
         for row in student_reader:
             student_name_str, requirements_str, *preferences = row
             student_name = normalize_str_field(student_name_str)
-            requirements = normalize_tuple_str_field(requirements_str)
+            requirements = tuple(r.upper() for r in normalize_tuple_str_field(requirements_str))
             student = Student(name=student_name, required_subjects=requirements)
             first_choices[student] = []
             second_choices[student] = []
@@ -72,7 +72,7 @@ def read_student_data_from_tsv(
             ):
                 try:
                     first_choices[student].append(
-                        titles_to_courses[period, normalize_str_field(first_choice)]
+                        titles_to_courses[period, normalize_str_field(first_choice).lower()]
                     )
                 except KeyError as e:
                     raise ValueError(
@@ -80,7 +80,7 @@ def read_student_data_from_tsv(
                     ) from e
                 try:
                     second_choices[student].append(
-                        titles_to_courses[period, normalize_str_field(second_choice)]
+                        titles_to_courses[period, normalize_str_field(second_choice).lower()]
                     )
                 except KeyError as e:
                     raise ValueError(
