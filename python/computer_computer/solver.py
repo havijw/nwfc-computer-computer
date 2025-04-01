@@ -23,11 +23,12 @@ various real-world constraints.
         \forall c \left[ \sum_s x_{sc} \leq 12 \cdot t_c \right]
     $$
     where $t_c$ is the number of teachers for course $c$.
-- Each student who is a multilingual learner must have a course with an ESL specialist:
+- Some students have required subject areas in which they must have a class:
     $$
-        \forall s \in \mathrm{ML} \left[ \sum_{c \in C_\mathrm{ESL}} x_{sc} \geq 1 \right]
+        \forall A_s \forall s \in A \left[ \sum_{c \in A_c} x_{sc} \geq 1 \right]
     $$
-    where $C_{\mathrm{ESL}}$ is the set of courses with an ESL specialist.
+    where $A_s$ is the set of students requiring subject area $A$ and $A_c$ is the set of courses
+    in subject area $A$.
 
 We also introduce a number of auxiliary variables that are used by the objective function in
 the `get_optimal_course_assignments` method.
@@ -44,7 +45,7 @@ from itertools import product
 import numpy as np
 from scipy.optimize import Bounds, LinearConstraint, milp
 
-from computer_computer.models import Course, Student, SubjectArea
+from computer_computer.models import Course, Student
 
 
 def get_period_groups(courses: Iterable[Course]) -> dict[int, list[Course]]:
@@ -90,32 +91,29 @@ class ComputerComputerSolver:
         # We define the positions of the decision variables and auxiliary variables, and define an
         # attribute with the total number of variables. This attribute should be used when setting
         # up coefficient vectors for constraints and the objective function.
+        self._total_variables = 0
+
         self.decision_variables = {
-            (student, course): i
+            (student, course): i + self._total_variables
             for i, (student, course) in enumerate(product(self.students, self.courses))
         }
+        self._total_variables += len(self.decision_variables)
+
         # See comments in the constraints section to understand each kind of aux variable.
         self.course_size_aux_variables = {
-            course: i + len(self.decision_variables) for i, course in enumerate(self.courses)
+            course: i + self._total_variables for i, course in enumerate(self.courses)
         }
-        self.period_target_students_per_teacher_aux_variables = {
-            period: i + len(self.decision_variables) + len(self.course_size_aux_variables)
-            for i, period in enumerate(period_groups)
-        }
-        self.course_size_deviation_from_target_aux_variables = {
-            course: i
-            + len(self.decision_variables)
-            + len(self.course_size_aux_variables)
-            + len(self.period_target_students_per_teacher_aux_variables)
-            for i, course in enumerate(self.courses)
-        }
+        self._total_variables += len(self.course_size_aux_variables)
 
-        self._total_variables = (
-            len(self.decision_variables)
-            + len(self.course_size_aux_variables)
-            + len(self.period_target_students_per_teacher_aux_variables)
-            + len(self.course_size_deviation_from_target_aux_variables)
-        )
+        self.period_target_students_per_teacher_aux_variables = {
+            period: i + self._total_variables for i, period in enumerate(period_groups)
+        }
+        self._total_variables += len(self.period_target_students_per_teacher_aux_variables)
+
+        self.course_size_deviation_from_target_aux_variables = {
+            course: i + self._total_variables for i, course in enumerate(self.courses)
+        }
+        self._total_variables += len(self.course_size_deviation_from_target_aux_variables)
 
         ############################################################
         #### Constraints ###########################################
@@ -139,12 +137,12 @@ class ComputerComputerSolver:
                 LinearConstraint(constraint_coefficients, ub=12 * len(course.teachers))
             )
 
-        # Constraint: multilingual learners must have a course with an ESL specialist
+        # Constraint: some students have required subject areas
         for student in self.students:
-            if student.is_multilingual_learner:
+            for required_subject_area in student.required_subjects:
                 constraint_coefficients = np.zeros(self._total_variables)
                 for course in self.courses:
-                    if any(teacher.subject_area == SubjectArea.ESL for teacher in course.teachers):
+                    if required_subject_area in course.subject_areas:
                         constraint_coefficients[self.decision_variables[(student, course)]] = 1
                 self.constraints.append(LinearConstraint(constraint_coefficients, lb=1))
 
