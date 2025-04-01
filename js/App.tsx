@@ -27,19 +27,6 @@ import TableBody from "@mui/material/TableBody";
 import TableHead from "@mui/material/TableHead";
 import { styled, Theme } from "@mui/material/styles";
 
-function FileCard(props: {
-  title: string;
-  file: File | undefined;
-  setFile: React.Dispatch<React.SetStateAction<File | undefined>>;
-  openDescription: () => void;
-}) {
-  return (
-    <Grid size={{ xs: 12, md: 6 }}>
-      <TSVDropZone {...props} />
-    </Grid>
-  );
-}
-
 // Table component with dividers between all cells and rounded corners
 const SpreadSheetTable = styled(Table)(({ theme }: { theme: Theme }) => ({
   borderCollapse: "separate",
@@ -124,22 +111,26 @@ export default function App() {
         }}
       >
         <Grid container spacing={2}>
-          <FileCard
-            title="Course List"
-            file={courseFile}
-            setFile={setCourseFile}
-            openDescription={() => {
-              setCourseFileModalOpen(true);
-            }}
-          />
-          <FileCard
-            title="Student List"
-            file={studentFile}
-            setFile={setStudentFile}
-            openDescription={() => {
-              setStudentFileModalOpen(true);
-            }}
-          />
+          <Grid size={{ xs: 12, md: 6 }}>
+            <TSVDropZone
+              title="Course Data"
+              file={courseFile}
+              setFile={setCourseFile}
+              openDescription={() => {
+                setCourseFileModalOpen(true);
+              }}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <TSVDropZone
+              title="Student Data"
+              file={studentFile}
+              setFile={setStudentFile}
+              openDescription={() => {
+                setStudentFileModalOpen(true);
+              }}
+            />
+          </Grid>
         </Grid>
         <ErrorBoundary FallbackComponent={CourseAssignmentFallbackComponent}>
           <CourseAssignmentSolver
@@ -171,7 +162,10 @@ export default function App() {
           </Button>
         </Stack>
       </Container>
-      {/********** Modals **********/}
+
+      {/**********************************************************************/}
+      {/******************************* Modals *******************************/}
+      {/**********************************************************************/}
       {/* Privacy policy */}
       <Modal
         open={privacyModalOpen}
@@ -202,59 +196,28 @@ export default function App() {
         </Paper>
       </Modal>
 
-      {/* Student file description */}
-      <FileDescriptionModal
-        open={studentFileModalOpen}
-        onClose={() => {
-          setStudentFileModalOpen(false);
-        }}
-        title="Student list file"
-      >
-        <Typography variant="body1">
-          The student list should be a spreadsheet with the format shown below. The
-          column titles don&apos;t need to be the same, but the columns should be in the
-          same order.
-        </Typography>
-        <TableContainer>
-          <SpreadSheetTable
-            aria-label="student-file-spreadsheet-format"
-            sx={{ borderRadius: 2 }}
-          >
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Is Multilingual Learner?</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                <TableCell>Student1</TableCell>
-                <TableCell>true</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Student2</TableCell>
-                <TableCell>false</TableCell>
-              </TableRow>
-            </TableBody>
-          </SpreadSheetTable>
-        </TableContainer>
-      </FileDescriptionModal>
-
-      {/* Course file description */}
+      {/* Course data file description */}
       <FileDescriptionModal
         open={courseFileModalOpen}
         onClose={() => {
           setCourseFileModalOpen(false);
         }}
-        title="Course list file"
+        title="Course data file"
       >
         <Typography variant="body1">
-          The course list file should be a spreadsheet with the format shown below. The
-          column titles don&apos;t need to be the same, but the columns should be in the
-          same order.
+          Course data is uploaded in a spreadsheet in TSV format with the columns shown
+          below. The column titles dont&apos;t need to tbe the same, but the order of
+          the columns should match the example.
         </Typography>
-        <ul>
-          <li>Teacher names should match the names given in the teacher list.</li>
+        <ul style={{ marginTop: "0.5rem" }}>
+          <li>
+            Subject areas and teacher names should be in a single cell for each course,
+            separated by commas.
+          </li>
+          <li>
+            Subject areas are case-insensitive and are matched with student subject
+            requirements from the student data file.
+          </li>
         </ul>
         <TableContainer>
           <SpreadSheetTable aria-label="teacher-file-spreadsheet-format">
@@ -274,16 +237,112 @@ export default function App() {
                 <TableCell>Teacher1</TableCell>
               </TableRow>
               <TableRow>
+                <TableCell>1</TableCell>
+                <TableCell>Geography</TableCell>
+                <TableCell>Social Studies,ESL</TableCell>
+                <TableCell>Teacher2</TableCell>
+              </TableRow>
+              <TableRow>
                 <TableCell>2</TableCell>
                 <TableCell>Reading Skills</TableCell>
                 <TableCell>ELA,ESL</TableCell>
-                <TableCell>Teacher2</TableCell>
+                <TableCell>Teacher3</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>3</TableCell>
                 <TableCell>US History</TableCell>
                 <TableCell>Social Studies</TableCell>
-                <TableCell>Teacher3,Teacher4</TableCell>
+                <TableCell>Teacher4,Teacher5</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>3</TableCell>
+                <TableCell>World Literature</TableCell>
+                <TableCell>ELA</TableCell>
+                <TableCell>Teacher6</TableCell>
+              </TableRow>
+            </TableBody>
+          </SpreadSheetTable>
+        </TableContainer>
+      </FileDescriptionModal>
+
+      {/* Student data file description */}
+      <FileDescriptionModal
+        open={studentFileModalOpen}
+        onClose={() => {
+          setStudentFileModalOpen(false);
+        }}
+        title="Student data file"
+      >
+        <Typography variant="body1">
+          Student data is uploaded in a spreadsheet in TSV format with the columns shown
+          below. The column titles dont&apos;t need to tbe the same, but the order of
+          the columns should match the example.
+        </Typography>
+        <ul style={{ marginTop: "0.5rem" }}>
+          <li>
+            Adding a required subject area for a student forces the solver to assign the
+            student at least one course in that subject area.
+          </li>
+          <li>
+            Multiple required subjects can be used for a single student separated by
+            commas.
+          </li>
+          <li>
+            Course titles are case-insensitive and will be matched with the course data
+            list to find the period and number of teachers for each course.
+          </li>
+        </ul>
+        <TableContainer>
+          <SpreadSheetTable
+            aria-label="student-file-spreadsheet-format"
+            sx={{ borderRadius: 2 }}
+          >
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Required Subjects</TableCell>
+                <TableCell>
+                  1<sup>st</sup> choice course period 1
+                </TableCell>
+                <TableCell>
+                  2<sup>nd</sup> choice course period 1
+                </TableCell>
+                <TableCell>&hellip;</TableCell>
+                <TableCell>
+                  1<sup>st</sup> choice course last period
+                </TableCell>
+                <TableCell>
+                  2<sup>nd</sup> choice course last period
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>Student1</TableCell>
+                <TableCell>ESL</TableCell>
+                <TableCell>Algebra 1</TableCell>
+                <TableCell>Geography</TableCell>
+                <TableCell>&hellip;</TableCell>
+                <TableCell>Physics</TableCell>
+                <TableCell>US History</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Student2</TableCell>
+                <TableCell>ESL,Math</TableCell>
+                <TableCell>Astronomy</TableCell>
+                <TableCell>Algebra 1</TableCell>
+                <TableCell>&hellip;</TableCell>
+                <TableCell>US History</TableCell>
+                <TableCell>World Literature</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Student3</TableCell>
+                <TableCell></TableCell>
+                <TableCell>Geography</TableCell>
+                <TableCell>Astronomy</TableCell>
+                <TableCell>&hellip;</TableCell>
+                <TableCell>World Literature</TableCell>
+                <TableCell>Physics</TableCell>
               </TableRow>
             </TableBody>
           </SpreadSheetTable>
