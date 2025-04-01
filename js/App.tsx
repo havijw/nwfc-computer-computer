@@ -94,20 +94,12 @@ export default function App() {
       });
   }, []);
 
-  const [studentFileInfo, studentFile, setStudentFile] = usePyodideTextFile(
-    "/data/students.tsv",
-    pyodide,
-  );
-  const [teacherFileInfo, teacherFile, setTeacherFile] = usePyodideTextFile(
-    "/data/teachers.tsv",
-    pyodide,
-  );
   const [courseFileInfo, courseFile, setCourseFile] = usePyodideTextFile(
     "/data/courses.tsv",
     pyodide,
   );
-  const [preferenceFileInfo, preferenceFile, setPreferenceFile] = usePyodideTextFile(
-    "/data/preferences.tsv",
+  const [studentFileInfo, studentFile, setStudentFile] = usePyodideTextFile(
+    "/data/students.tsv",
     pyodide,
   );
 
@@ -135,22 +127,6 @@ export default function App() {
       >
         <Grid container spacing={2}>
           <FileCard
-            title="Student List"
-            file={studentFile}
-            setFile={setStudentFile}
-            openDescription={() => {
-              setStudentFileModalOpen(true);
-            }}
-          />
-          <FileCard
-            title="Teacher List"
-            file={teacherFile}
-            setFile={setTeacherFile}
-            openDescription={() => {
-              setTeacherFileModalOpen(true);
-            }}
-          />
-          <FileCard
             title="Course List"
             file={courseFile}
             setFile={setCourseFile}
@@ -159,11 +135,11 @@ export default function App() {
             }}
           />
           <FileCard
-            title="Course Preferences"
-            file={preferenceFile}
-            setFile={setPreferenceFile}
+            title="Student List"
+            file={studentFile}
+            setFile={setStudentFile}
             openDescription={() => {
-              setPreferenceFileModalOpen(true);
+              setStudentFileModalOpen(true);
             }}
           />
         </Grid>
@@ -171,10 +147,8 @@ export default function App() {
           <CourseAssignmentSolver
             pyodide={pyodide}
             solverInputFiles={{
-              students: studentFileInfo,
-              teachers: teacherFileInfo,
               courses: courseFileInfo,
-              preferences: preferenceFileInfo,
+              students: studentFileInfo,
             }}
           />
         </ErrorBoundary>

@@ -64,12 +64,7 @@ export function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
 
 export default function CourseAssignmentSolver({
   pyodide,
-  solverInputFiles: {
-    students: studentFileInfo,
-    teachers: teacherFileInfo,
-    courses: courseFileInfo,
-    preferences: preferenceFileInfo,
-  },
+  solverInputFiles: { students: studentFileInfo, courses: courseFileInfo },
 }: {
   pyodide: PyodideInterface | undefined;
   solverInputFiles: SolverInputFiles;
@@ -80,11 +75,7 @@ export default function CourseAssignmentSolver({
   const [pyodideError, setPyodideError] = useState<unknown>();
   if (pyodideError) throw pyodideError as Error;
 
-  const allFilesLoaded =
-    studentFileInfo.isLoaded &&
-    teacherFileInfo.isLoaded &&
-    courseFileInfo.isLoaded &&
-    preferenceFileInfo.isLoaded;
+  const allFilesLoaded = courseFileInfo.isLoaded && studentFileInfo.isLoaded;
 
   const loadingMessage = !pyodide
     ? "Loading solver..."
@@ -103,10 +94,8 @@ export default function CourseAssignmentSolver({
         const solverEntrypoint = pyodide.pyimport("computer_computer.file_entrypoint");
         const assignmentsProxy =
           solverEntrypoint.get_optimal_course_assignments_from_files(
-            studentFileInfo.path,
-            teacherFileInfo.path,
             courseFileInfo.path,
-            preferenceFileInfo.path,
+            studentFileInfo.path,
           ) as PyProxy;
         // To avoid memory leaks, don't use proxies
         // See https://pyodide.org/en/stable/usage/type-conversions.html#type-translations-pyproxy-to-js
@@ -130,14 +119,7 @@ export default function CourseAssignmentSolver({
     } else {
       setCourseAssignments([]);
     }
-  }, [
-    pyodide,
-    allFilesLoaded,
-    courseFileInfo,
-    preferenceFileInfo,
-    studentFileInfo,
-    teacherFileInfo,
-  ]);
+  }, [pyodide, allFilesLoaded, courseFileInfo, studentFileInfo]);
 
   return (
     <Paper elevation={3} sx={{ marginTop: "1rem", padding: "0.5rem" }}>
@@ -150,7 +132,7 @@ export default function CourseAssignmentSolver({
                   P{course.period}. {course.title}
                 </Box>
                 <p style={{ marginTop: "0.25rem", marginBottom: "0.25rem" }}>
-                  <i>{course.teachers.map((teacher) => teacher.name).join(", ")}</i>
+                  <i>{course.teachers.join(", ")}</i>
                   <br />
                   {students.length} students:
                 </p>
