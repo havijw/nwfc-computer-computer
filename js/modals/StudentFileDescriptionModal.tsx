@@ -34,8 +34,13 @@ export default function StudentFileDescriptionModal({ open, setOpen }: ModalProp
           commas.
         </li>
         <li>
-          Course titles are case-insensitive and will be matched with the course data
-          list to find the period and number of teachers for each course.
+          Course titles are case-insensitive. The preference columns will be matched
+          with the course data list based on the start of the provided value. For
+          example, &ldquo;Physics (Teacher1 and Teacher2)&rdquo; would match with a
+          course titled &ldquo;Physics&rdquo; in the same period. Note that this could
+          lead to unexpected behavior if there is a course title that starts with
+          another course&apos;s title, like &ldquo;Physics&rdquo; and &ldquo;Physics
+          2&rdquo;. In that case, the example above could match with either course.
         </li>
       </ul>
       <TableContainer>
