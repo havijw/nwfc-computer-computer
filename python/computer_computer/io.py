@@ -73,13 +73,13 @@ def read_student_data_from_tsv(
                 # field.
                 # Assume there is only one matching course (by period and title) per preference.
                 for course in courses:
-                    if course.period == period and course.title.lower().startswith(
-                        normalize_str_field(first_choice).lower()
-                    ):
+                    if course.period == period and normalize_str_field(
+                        first_choice
+                    ).lower().startswith(course.title.lower()):
                         first_choices[student].append(course)
-                    elif course.period == period and course.title.lower().startswith(
-                        normalize_str_field(second_choice).lower()
-                    ):
+                    elif course.period == period and normalize_str_field(
+                        second_choice
+                    ).lower().startswith(course.title.lower()):
                         second_choices[student].append(course)
 
                 if not any(course.period == period for course in first_choices[student]):
