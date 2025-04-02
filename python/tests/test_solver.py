@@ -11,4 +11,7 @@ def test_computer_computer_solver(data_dir: Path):
     )
     students = list(first_choices.keys())
     solver = ComputerComputerSolver(students, courses)
-    solver.get_optimal_course_assignments(first_choices, second_choices)
+    course_assignments = solver.get_optimal_course_assignments(first_choices, second_choices)
+    for course in courses:
+        assert course in course_assignments
+        assert len(course_assignments[course]) > 0

@@ -8,7 +8,7 @@ from computer_computer.models import Course, Student
 
 
 def normalize_str_field(value: str) -> str:
-    """Strip extra whitespace and make the value lowercase."""
+    """Strip extra whitespace."""
     return value.strip()
 
 
@@ -55,8 +55,6 @@ def read_student_data_from_tsv(
     first_choices: dict[Student, list[Course]] = {}
     second_choices: dict[Student, list[Course]] = {}
 
-    titles_to_courses = {(course.period, course.title.lower()): course for course in courses}
-
     with student_file.open(newline="") as tsv_file:
         student_reader = csv.reader(tsv_file, delimiter="\t")
         next(student_reader)  # Skip the header row
@@ -70,20 +68,26 @@ def read_student_data_from_tsv(
             for period, (first_choice, second_choice) in enumerate(
                 zip(preferences[::2], preferences[1::2]), start=1
             ):
-                try:
-                    first_choices[student].append(
-                        titles_to_courses[period, normalize_str_field(first_choice).lower()]
-                    )
-                except KeyError as e:
+                # Find courses with the right period and title, assuming the preferences values
+                # start with the title but might have other information (like teacher names) in the
+                # field.
+                # Assume there is only one matching course (by period and title) per preference.
+                for course in courses:
+                    if course.period == period and course.title.lower().startswith(
+                        normalize_str_field(first_choice).lower()
+                    ):
+                        first_choices[student].append(course)
+                    elif course.period == period and course.title.lower().startswith(
+                        normalize_str_field(second_choice).lower()
+                    ):
+                        second_choices[student].append(course)
+
+                if not any(course.period == period for course in first_choices[student]):
                     raise ValueError(
                         f"Unrecognized course title for period {period}: {first_choice}"
-                    ) from e
-                try:
-                    second_choices[student].append(
-                        titles_to_courses[period, normalize_str_field(second_choice).lower()]
                     )
-                except KeyError as e:
+                if not any(course.period == period for course in second_choices[student]):
                     raise ValueError(
                         f"Unrecognized course title for period {period}: {second_choice}"
-                    ) from e
+                    )
         return first_choices, second_choices
