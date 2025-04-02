@@ -68,26 +68,41 @@ def read_student_data_from_tsv(
             for period, (first_choice, second_choice) in enumerate(
                 zip(preferences[::2], preferences[1::2]), start=1
             ):
+                first_choice_matches: list[Course] = []
+                second_choice_matches: list[Course] = []
+
                 # Find courses with the right period and title, assuming the preferences values
                 # start with the title but might have other information (like teacher names) in the
                 # field.
-                # Assume there is only one matching course (by period and title) per preference.
                 for course in courses:
                     if course.period == period and normalize_str_field(
                         first_choice
                     ).lower().startswith(course.title.lower()):
-                        first_choices[student].append(course)
+                        first_choice_matches.append(course)
                     elif course.period == period and normalize_str_field(
                         second_choice
                     ).lower().startswith(course.title.lower()):
-                        second_choices[student].append(course)
+                        second_choice_matches.append(course)
 
-                if not any(course.period == period for course in first_choices[student]):
+                if len(first_choice_matches) == 0:
                     raise ValueError(
                         f"Unrecognized course title for period {period}: {first_choice}"
                     )
-                if not any(course.period == period for course in second_choices[student]):
+                if len(second_choice_matches) == 0:
                     raise ValueError(
                         f"Unrecognized course title for period {period}: {second_choice}"
                     )
+
+                # Multiple courses could match if one course's title starts with another course's
+                # title. This is actually plausible, like "Physics" and "Physics 2", so we shouldn't
+                # impose a uniqueness requirement. If this happens, we should consider the matched
+                # course with the longest title as the "best" match - for example, if both "Physics"
+                # and "Physics 2" match, "Phsyics 2" is the better match, because a preference for
+                # "Physics" should only match
+                first_choices[student].append(
+                    max(first_choice_matches, key=lambda course: len(course.title))
+                )
+                second_choices[student].append(
+                    max(second_choice_matches, key=lambda course: len(course.title))
+                )
         return first_choices, second_choices
