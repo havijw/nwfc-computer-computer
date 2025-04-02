@@ -18,7 +18,7 @@ if tar --wildcards --help >/dev/null 2>&1; then
   WILDCARD_FLAG=--wildcards
 fi
 tar -xvjf $PYODIDE_ARCHIVE_PATH -C node_modules/pyodide --exclude="*tests*" \
-  $WILDCARD_FLAG pyodide/{numpy,scipy,openblas,pydantic,annotated_types,typing_extensions}*
+  $WILDCARD_FLAG pyodide/{numpy,scipy,openblas}*
 mv node_modules/pyodide/pyodide/* node_modules/pyodide
 
 echo "Cleaning up extraneous files"

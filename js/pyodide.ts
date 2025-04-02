@@ -11,7 +11,7 @@ export default async function loadPyodideAndPackages() {
     `import sys; sys.version.split(" ")[0]`,
   )) as string;
   console.log(`Loaded pyodide with python version ${pyversion}`);
-  await pyodide.loadPackage(["numpy", "pydantic", "scipy"]);
+  await pyodide.loadPackage(["numpy", "scipy"]);
 
   console.log("Loading computer_computer");
   // Load computer_computer package either from files (for dev) or from built wheel (for prod)
