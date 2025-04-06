@@ -45,7 +45,7 @@ from itertools import product
 import numpy as np
 from scipy.optimize import Bounds, LinearConstraint, milp
 
-from computer_computer.models import Course, Student
+from computer_computer.models import Course, SolverConfiguration, Student
 
 
 def get_period_groups(courses: Iterable[Course]) -> dict[int, list[Course]]:
@@ -69,6 +69,7 @@ class ComputerComputerSolver:
     Attributes:
         students (list[Student]): List of students to be placed in courses.
         courses (list[Course]): List of available courses.
+        config (SolverConfiguration): Configuration options for the solver.
         decision_variables (dict[tuple[Student, Course], int]): Positions of decision variables
             representing whether each student is assigned to each course.
         auxiliary_variables (list[int]): Positions of all auxiliary variables constructed for the
@@ -78,10 +79,16 @@ class ComputerComputerSolver:
             variables.
     """
 
-    def __init__(self, students: Iterable[Student], courses: Iterable[Course]):
+    def __init__(
+        self,
+        students: Iterable[Student],
+        courses: Iterable[Course],
+        config: SolverConfiguration = SolverConfiguration(maximum_students_per_teacher=10),
+    ):
         """Defines the problem with decision and auxiliary variables and linear constraints."""
         self.students = list(students)
         self.courses = list(courses)
+        self.config = config
         period_groups = get_period_groups(self.courses)
 
         ############################################################
@@ -134,7 +141,10 @@ class ComputerComputerSolver:
             for student in self.students:
                 constraint_coefficients[self.decision_variables[(student, course)]] = 1
             self.constraints.append(
-                LinearConstraint(constraint_coefficients, ub=12 * len(course.teachers))
+                LinearConstraint(
+                    constraint_coefficients,
+                    ub=self.config.maximum_students_per_teacher * len(course.teachers),
+                )
             )
 
         # Constraint: some students have required subject areas
@@ -240,16 +250,20 @@ class ComputerComputerSolver:
         # Objective: give students their preferred courses
         for student, first_choices in first_choice_courses.items():
             for course in first_choices:
-                objective_function_coefficients[self.decision_variables[(student, course)]] = 2
+                objective_function_coefficients[self.decision_variables[(student, course)]] = (
+                    self.config.student_first_choice_preference_weight
+                )
         for student, second_choices in second_choice_courses.items():
             for course in second_choices:
-                objective_function_coefficients[self.decision_variables[(student, course)]] = 1
+                objective_function_coefficients[self.decision_variables[(student, course)]] = (
+                    self.config.student_second_choice_preference_weight
+                )
 
         # Objective: minimize deviation from target ratio of students/teacher
         for course in self.courses:
             objective_function_coefficients[
                 self.course_size_deviation_from_target_aux_variables[course]
-            ] = -1
+            ] = -self.config.even_student_distribution_weight
 
         # Decision variables are integral; auxiliary variables don't need to be
         integrality = np.zeros(self._total_variables, dtype=int)

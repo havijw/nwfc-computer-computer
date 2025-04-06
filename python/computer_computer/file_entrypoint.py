@@ -7,11 +7,14 @@ from computer_computer.io import (
     read_course_data_from_tsv,
     read_student_data_from_tsv,
 )
+from computer_computer.models import SolverConfiguration
 from computer_computer.solver import ComputerComputerSolver
 
 
 def get_optimal_course_assignments_from_files(
-    courses_file: str, students_file: str
+    courses_file: str,
+    students_file: str,
+    config: SolverConfiguration = SolverConfiguration(maximum_students_per_teacher=12),
 ) -> list[tuple[dict[str, Any], list[dict[str, Any]]]]:
     """Read input data from files and determine optimal course assignments.
 
@@ -23,7 +26,7 @@ def get_optimal_course_assignments_from_files(
     courses = read_course_data_from_tsv(Path(courses_file))
     first_choices, second_choices = read_student_data_from_tsv(Path(students_file), courses=courses)
     students = list(first_choices.keys())
-    solver = ComputerComputerSolver(students, courses)
+    solver = ComputerComputerSolver(students, courses, config=config)
     assignments = solver.get_optimal_course_assignments(first_choices, second_choices)
     return [
         (course._asdict(), [student._asdict() for student in students])
