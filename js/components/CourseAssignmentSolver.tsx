@@ -15,7 +15,7 @@ import { PyodideInterface } from "pyodide";
 import { PyProxy } from "pyodide/ffi";
 import { ErrorBoundary } from "react-error-boundary";
 
-import type { Course, Student } from "../models";
+import type { Course, SolverConfiguration, Student } from "../models";
 import type { PyodideFileInfo } from "../hooks/usePyodideTextFile";
 
 /** Fallback component for error state of `CourseAssignment` component.
@@ -36,8 +36,8 @@ function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
     >
       <Stack>
         <Typography sx={{ textAlign: "center" }}>
-          Solving optimal course assignments failed. Check files uploaded, reload page,
-          and try again.
+          Solving optimal course assignments failed. Check settings and files uploaded,
+          reload page, and try again.
         </Typography>
         <Accordion
           sx={{
@@ -92,6 +92,9 @@ interface CourseAssignmentSolverProps {
 
   /** Information about data files used by the solver. */
   solverInputFiles: SolverInputFiles;
+
+  /** Configuration options for the solver. */
+  solverConfig: SolverConfiguration;
 }
 
 /** Base component for course assignment solving with Pyodide.
@@ -101,6 +104,7 @@ interface CourseAssignmentSolverProps {
 function CourseAssignmentSolverBase({
   pyodide,
   solverInputFiles: { students: studentFileInfo, courses: courseFileInfo },
+  solverConfig,
 }: CourseAssignmentSolverProps) {
   const theme = useTheme();
   const [courseAssignments, setCourseAssignments] = useState<[Course, Student[]][]>([]);
@@ -129,6 +133,7 @@ function CourseAssignmentSolverBase({
           solverEntrypoint.get_optimal_course_assignments_from_files(
             courseFileInfo.path,
             studentFileInfo.path,
+            solverConfig,
           ) as PyProxy;
         // To avoid memory leaks, don't use proxies
         // See https://pyodide.org/en/stable/usage/type-conversions.html#type-translations-pyproxy-to-js
@@ -152,7 +157,7 @@ function CourseAssignmentSolverBase({
     } else {
       setCourseAssignments([]);
     }
-  }, [pyodide, allFilesLoaded, courseFileInfo, studentFileInfo]);
+  }, [pyodide, allFilesLoaded, courseFileInfo, studentFileInfo, solverConfig]);
 
   return (
     <Paper elevation={3} sx={{ padding: "0.5rem" }}>

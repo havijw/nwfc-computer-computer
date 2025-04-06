@@ -4,9 +4,12 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
+import Drawer from "@mui/material/Drawer";
 import Grid from "@mui/material/Grid2";
+import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { PyodideInterface } from "pyodide";
 
 import logoURL from "/computer-computer-icon.jpg?url";
@@ -17,7 +20,9 @@ import loadPyodideAndPackages from "./pyodide.ts";
 import AppTheme from "./theme.tsx";
 import PrivacyModal from "./modals/PrivacyModal.tsx";
 import CourseFileDescriptionModal from "./modals/CourseFileDescriptionModal.tsx";
+import SolverSettingsForm from "./components/SolverSettingsForm.tsx";
 import StudentFileDescriptionModal from "./modals/StudentFileDescriptionModal.tsx";
+import { defaultSolverConfiguration } from "./models.ts";
 
 /** Main app component. */
 export default function ComputerComputerApp() {
@@ -25,6 +30,8 @@ export default function ComputerComputerApp() {
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
   const [courseFileModalOpen, setCourseFileModalOpen] = useState(false);
   const [studentFileModalOpen, setStudentFileModalOpen] = useState(false);
+  const [solverSettingsOpen, setSolverSettingsOpen] = useState(false);
+  const [solverConfig, setSolverConfig] = useState(defaultSolverConfiguration());
 
   // TODO Extract the pyodide functionality to a web worker, post messages on file uploads,
   //      and receive messages on updates to course assignments.
@@ -67,7 +74,17 @@ export default function ComputerComputerApp() {
             alt="Computer-computer logo: a friendly robot"
             src={logoURL}
           />
-          <Typography variant="h5">NWFC Computer-Computer</Typography>
+          <Typography variant="h5" sx={{ flexGrow: 1 }}>
+            NWFC Computer-Computer
+          </Typography>
+          <IconButton
+            aria-label="settings"
+            onClick={() => {
+              setSolverSettingsOpen(true);
+            }}
+          >
+            <SettingsIcon />
+          </IconButton>
         </Stack>
       </Container>
       <Container
@@ -106,6 +123,7 @@ export default function ComputerComputerApp() {
                 courses: courseFileInfo,
                 students: studentFileInfo,
               }}
+              solverConfig={solverConfig}
             />
           </Grid>
         </Grid>
@@ -130,6 +148,20 @@ export default function ComputerComputerApp() {
           </Button>
         </Stack>
       </Container>
+
+      {/********** Solver Settings Sidebar **********/}
+      <Drawer
+        open={solverSettingsOpen}
+        onClose={() => {
+          setSolverSettingsOpen(false);
+        }}
+        anchor="right"
+      >
+        <SolverSettingsForm
+          config={solverConfig}
+          setConfig={setSolverConfig}
+        ></SolverSettingsForm>
+      </Drawer>
 
       {/********** Modals **********/}
       <PrivacyModal open={privacyModalOpen} setOpen={setPrivacyModalOpen} />

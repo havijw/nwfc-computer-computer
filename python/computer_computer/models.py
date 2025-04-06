@@ -35,7 +35,7 @@ class Course(NamedTuple):
 class SolverConfiguration(NamedTuple):
     """Contains configuration options for the computer-computer solver."""
 
-    maximum_students_per_teacher: int | dict[int, int]
+    maximum_students_per_teacher: int = 12
     """Absolute maximum number of students per teacher in each course.
 
     This setting is not used to set the _target_ number of students per course, which is
