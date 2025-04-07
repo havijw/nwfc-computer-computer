@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import SettingsIcon from "@mui/icons-material/Settings";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -9,7 +10,6 @@ import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import SettingsIcon from "@mui/icons-material/Settings";
 import { PyodideInterface } from "pyodide";
 
 import logoURL from "/computer-computer-icon.jpg?url";
