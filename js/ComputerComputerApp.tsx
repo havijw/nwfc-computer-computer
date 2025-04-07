@@ -160,6 +160,9 @@ export default function ComputerComputerApp() {
         <SolverSettingsForm
           config={solverConfig}
           setConfig={setSolverConfig}
+          closePanel={() => {
+            setSolverSettingsOpen(false);
+          }}
         ></SolverSettingsForm>
       </Drawer>
 
