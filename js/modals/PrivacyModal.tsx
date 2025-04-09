@@ -21,9 +21,10 @@ export default function PrivacyModal({ open, setOpen }: ModalProps) {
       <Paper
         sx={{
           position: "absolute",
-          top: "30%",
+          top: "40%",
           left: "50%",
           transform: "translate(-50%, -50%)",
+          minWidth: "min(100%, 300px)",
           p: "1rem",
         }}
       >
