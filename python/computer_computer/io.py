@@ -79,7 +79,7 @@ def read_student_data_from_tsv(
                         first_choice
                     ).lower().startswith(course.title.lower()):
                         first_choice_matches.append(course)
-                    elif course.period == period and normalize_str_field(
+                    if course.period == period and normalize_str_field(
                         second_choice
                     ).lower().startswith(course.title.lower()):
                         second_choice_matches.append(course)
