@@ -64,7 +64,7 @@ export default function TSVDropZone({
       </Stack>
       {file ? (
         <Box sx={dropzoneStyles}>
-          <Stack alignItems="center" direction="row" flexGrow={1}>
+          <Stack direction="row" alignItems="center" spacing={1} flexGrow={1}>
             <BorderAllIcon />
             <Typography flexGrow={1}>{file.name}</Typography>
             <IconButton

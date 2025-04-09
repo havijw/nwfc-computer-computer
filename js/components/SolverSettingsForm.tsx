@@ -65,6 +65,7 @@ function SolverConfigFieldSlider({
         step={sliderStep}
         marks={[
           { value: sliderMin, label: sliderMin },
+          { value: value, label: value },
           { value: sliderMax, label: sliderMax },
         ]}
       />
@@ -123,8 +124,8 @@ export default function SolverSettingsForm({
           <Typography variant="h5" sx={{ flexGrow: 1 }}>
             Solver Settings
           </Typography>
-          <IconButton aria-label="close" onClick={closePanel}>
-            <CloseIcon></CloseIcon>
+          <IconButton aria-label="close" onClick={closePanel} sx={{ margin: "-8px" }}>
+            <CloseIcon />
           </IconButton>
         </Stack>
         <SolverConfigFieldSlider

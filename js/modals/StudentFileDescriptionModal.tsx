@@ -9,7 +9,7 @@ import FileDescriptionModal from "../components/FileDescriptionModal";
 import SpreadSheetTable from "../components/SpreadSheetTable";
 import type ModalProps from "./ModalProps";
 
-/** Modal component with a description of the student data file. */
+/** Modal component with a description of the students & preferences file. */
 export default function StudentFileDescriptionModal({ open, setOpen }: ModalProps) {
   return (
     <FileDescriptionModal
@@ -17,12 +17,12 @@ export default function StudentFileDescriptionModal({ open, setOpen }: ModalProp
       onClose={() => {
         setOpen(false);
       }}
-      title="Student data file"
+      title="Students & preferences file"
     >
       <Typography variant="body1">
-        Student data is uploaded in a spreadsheet in TSV format with the columns shown
-        below. The column titles dont&apos;t need to tbe the same, but the order of the
-        columns should match the example.
+        Student and preference informaiton is uploaded in a spreadsheet in TSV format
+        with the columns shown below. The column titles dont&apos;t need to tbe the
+        same, but the order of the columns should match the example.
       </Typography>
       <ul style={{ marginTop: "0.5rem" }}>
         <li>
@@ -35,9 +35,9 @@ export default function StudentFileDescriptionModal({ open, setOpen }: ModalProp
         </li>
         <li>
           Course titles are case-insensitive. The preference columns will be matched
-          with the course data list based on the start of the provided value. For
-          example, &ldquo;Physics (Teacher1 and Teacher2)&rdquo; would match with a
-          course titled &ldquo;Physics&rdquo; in the same period.
+          with the course list based on the start of the provided value. For example,
+          &ldquo;Physics (Teacher1 and Teacher2)&rdquo; would match with a course titled
+          &ldquo;Physics&rdquo; in the same period.
         </li>
       </ul>
       <TableContainer>

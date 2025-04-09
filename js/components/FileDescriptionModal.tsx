@@ -1,6 +1,9 @@
+import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 /** Props for the `FileDescriptionModal` component. */
@@ -44,9 +47,14 @@ export default function FileDescriptionModal({
           padding: "1rem",
         }}
       >
-        <Typography variant="h6" id={`${title}-modal-title`}>
-          {title}
-        </Typography>
+        <Stack direction="row" alignItems="center" sx={{ marginBottom: "0.5rem" }}>
+          <Typography variant="h6" id={`${title}-modal-title`} sx={{ flexGrow: 1 }}>
+            {title}
+          </Typography>
+          <IconButton aria-label="close" onClick={onClose} sx={{ margin: "-8px" }}>
+            <CloseIcon />
+          </IconButton>
+        </Stack>
         <Box id={`${title}-modal-description`}>{children}</Box>
       </Paper>
     </Modal>

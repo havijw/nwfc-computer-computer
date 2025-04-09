@@ -9,7 +9,7 @@ import FileDescriptionModal from "../components/FileDescriptionModal";
 import SpreadSheetTable from "../components/SpreadSheetTable";
 import type ModalProps from "./ModalProps";
 
-/** Modal component with a description of the course data file. */
+/** Modal component with a description of the courses file. */
 export default function CourseFileDescriptionModal({ open, setOpen }: ModalProps) {
   return (
     <FileDescriptionModal
@@ -17,12 +17,12 @@ export default function CourseFileDescriptionModal({ open, setOpen }: ModalProps
       onClose={() => {
         setOpen(false);
       }}
-      title="Course data file"
+      title="Courses file"
     >
       <Typography variant="body1">
-        Course data is uploaded in a spreadsheet in TSV format with the columns shown
-        below. The column titles dont&apos;t need to tbe the same, but the order of the
-        columns should match the example.
+        The course list is uploaded in a spreadsheet in TSV format with the columns
+        shown below. The column titles dont&apos;t need to tbe the same, but the order
+        of the columns should match the example.
       </Typography>
       <ul style={{ marginTop: "0.5rem" }}>
         <li>
@@ -31,7 +31,7 @@ export default function CourseFileDescriptionModal({ open, setOpen }: ModalProps
         </li>
         <li>
           Subject areas are case-insensitive and are matched with student subject
-          requirements from the student data file.
+          requirements from the students & preferences file.
         </li>
       </ul>
       <TableContainer>

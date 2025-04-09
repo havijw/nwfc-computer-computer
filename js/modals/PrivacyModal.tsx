@@ -1,5 +1,8 @@
+import CloseIcon from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import ModalProps from "./ModalProps";
@@ -24,9 +27,19 @@ export default function PrivacyModal({ open, setOpen }: ModalProps) {
           p: "1rem",
         }}
       >
-        <Typography variant="h6" id="privacy-modal-title">
-          Privacy Policy
-        </Typography>
+        <Stack direction="row" alignItems="center" sx={{ marginBottom: "0.5rem" }}>
+          <Typography variant="h6" id="privacy-modal-title" sx={{ flexGrow: 1 }}>
+            Privacy Policy
+          </Typography>
+          <IconButton
+            onClick={() => {
+              setOpen(false);
+            }}
+            sx={{ margin: "-8px" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Stack>
         <Typography variant="body1" id="privacy-modal-description">
           No information is collected or stored, ever. Your files do not leave your
           computer — you can verify this by loading the page, waiting for the solver to

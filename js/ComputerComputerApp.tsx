@@ -98,7 +98,7 @@ export default function ComputerComputerApp() {
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
             <TSVDropZone
-              title="Course Data"
+              title="Courses"
               file={courseFile}
               setFile={setCourseFile}
               openDescription={() => {
@@ -108,7 +108,7 @@ export default function ComputerComputerApp() {
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TSVDropZone
-              title="Student Data"
+              title="Students & preferences"
               file={studentFile}
               setFile={setStudentFile}
               openDescription={() => {
