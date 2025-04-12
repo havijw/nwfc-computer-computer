@@ -204,7 +204,10 @@ function CourseAssignmentSolverBase({
 /** Course assignment solver component with error boundary. */
 export default function CourseAssignmentSolver(props: CourseAssignmentSolverProps) {
   return (
-    <ErrorBoundary FallbackComponent={CourseAssignmentFallbackComponent}>
+    <ErrorBoundary
+      FallbackComponent={CourseAssignmentFallbackComponent}
+      resetKeys={[props]}
+    >
       <CourseAssignmentSolverBase {...props} />
     </ErrorBoundary>
   );
