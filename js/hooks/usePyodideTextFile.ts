@@ -1,5 +1,6 @@
-import { PyodideInterface } from "pyodide";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import pyodideWorker from "../worker/pyodideWorkerInstance";
+import { WorkerResponse } from "../worker/workerTypes";
 
 /** Information about a Pyodide file controlled by the `usePyodideTextFile` hook.  */
 export interface PyodideFileInfo {
@@ -10,28 +11,11 @@ export interface PyodideFileInfo {
   isLoaded: boolean;
 }
 
-// TODO remove this type if pyodide updates the FS type
-// See https://github.com/pyodide/pyodide/issues/5546
-interface AnalyzePathResult {
-  isRoot: boolean;
-  exists: boolean;
-  error: Error;
-  name: string;
-  path: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  object: any;
-  parentExists: boolean;
-  parentPath: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parentObject: any;
-}
-
 /** React hook to synchronize a state file object with a location in Pyodide's file system.
  *
  * Changes to the state file object are reflected in Pyodide's file system, but not vice-versa.
  *
  * @param filepath The path where the file should be loaded in Pyodide's file system.
- * @param pyodide The Pyodide instance with the file system where the file should be loaded.
  *
  * @returns Array with three objects:
  *   - `PyodideFileInfo`: Information about the file in Pyodide's file system.
@@ -40,62 +24,49 @@ interface AnalyzePathResult {
  */
 export default function usePyodideTextFile(
   filepath: string,
-  pyodide: PyodideInterface | undefined,
 ): [
   PyodideFileInfo,
   File | undefined,
   React.Dispatch<React.SetStateAction<File | undefined>>,
 ] {
-  // Break down and normalize file path to ensure it uses "/" as a separator
-  const pathComponents = filepath.split(/[/\\]/); // Guaranteed to have at least one item to pop
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const fileName = pathComponents.pop()!;
-  const fileDirectory = pathComponents.join("/");
-  const normalizedFilePath = [fileDirectory, fileName].join("/");
-
   const [file, setFile] = useState<File | undefined>();
-  const [isFileLoaded, setIsFileLoaded] = useState<boolean>(false);
+  const [isFileLoaded, setIsFileLoaded] = useState(false);
+  const [isPyodideLoaded, setIsPyodideLoaded] = useState(false);
+
+  const handlePyodideWorkerMessage = useCallback(
+    (e: MessageEvent<WorkerResponse>) => {
+      if (e.data.type === "status") {
+        setIsPyodideLoaded(e.data.ready);
+      } else if (e.data.type === "file" && e.data.path == filepath) {
+        setIsFileLoaded(e.data.loaded);
+      }
+    },
+    [filepath],
+  );
 
   useEffect(() => {
-    if (pyodide) {
-      const {
-        parentExists,
-        exists: fileExists,
-        // TODO remove these disables if Pyodide updates the FS type
-        // See https://github.com/pyodide/pyodide/issues/5546
-        // @ts-expect-error Pyodide doesn't have the right signature for FS
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      } = pyodide.FS.analyzePath(normalizedFilePath) as AnalyzePathResult;
-      if (!parentExists) {
-        pyodide.FS.mkdirTree(fileDirectory);
-      }
+    pyodideWorker.addEventListener("message", handlePyodideWorkerMessage);
 
-      if (file) {
-        file
-          .text()
-          .then((text) => {
-            pyodide.FS.writeFile(normalizedFilePath, text);
-            setIsFileLoaded(true);
-          })
-          .catch((reason: unknown) => {
-            throw new Error(
-              `Reading file contents as text for path ${normalizedFilePath} failed.\n` +
-                String(reason),
-            );
-          });
-        console.log(`Loaded file to ${normalizedFilePath}`);
-      } else {
-        if (fileExists) {
-          pyodide.FS.unlink(normalizedFilePath);
-          setIsFileLoaded(false);
-          console.log(`Removed file at ${normalizedFilePath}`);
-        } else {
-          // If pyodide finishes loading and `file` is not set, we need to no-op.
-          console.log(`No file found at ${normalizedFilePath}, so nothing to remove.`);
-        }
-      }
+    return () => {
+      pyodideWorker.removeEventListener("message", handlePyodideWorkerMessage);
+    };
+  }, [handlePyodideWorkerMessage]);
+
+  useEffect(() => {
+    if (isPyodideLoaded) {
+      pyodideWorker.postMessage({
+        id: crypto.randomUUID(),
+        type: "file",
+        file: file,
+        path: filepath,
+      });
     }
-  }, [pyodide, file, fileDirectory, normalizedFilePath]);
+  }, [isPyodideLoaded, file, filepath]);
 
-  return [{ path: normalizedFilePath, isLoaded: isFileLoaded }, file, setFile];
+  const fileInfo = useMemo<PyodideFileInfo>(
+    () => ({ path: filepath, isLoaded: isFileLoaded }),
+    [filepath, isFileLoaded],
+  );
+
+  return [fileInfo, file, setFile];
 }

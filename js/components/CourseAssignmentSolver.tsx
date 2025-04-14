@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -11,12 +11,12 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
-import { PyodideInterface } from "pyodide";
-import { PyProxy } from "pyodide/ffi";
 import { ErrorBoundary } from "react-error-boundary";
 
 import type { Course, SolverConfiguration, Student } from "../models";
 import type { PyodideFileInfo } from "../hooks/usePyodideTextFile";
+import pyodideWorker from "../worker/pyodideWorkerInstance";
+import { type WorkerResponse } from "../worker/workerTypes";
 
 /** Fallback component for error state of `CourseAssignment` component.
  *
@@ -73,25 +73,13 @@ function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
   );
 }
 
-/** Information about data files used by the solver. */
-export interface SolverInputFiles {
-  /** Course data file information. */
-  courses: PyodideFileInfo;
-
-  /** Student data file information. */
-  students: PyodideFileInfo;
-}
-
 /** Props for the `CourseAssignmentSolver` component. */
 interface CourseAssignmentSolverProps {
-  /** Pyodide instance with all necessary packages loaded.
-   *
-   * Should be React state and `undefined` until ready.
-   */
-  pyodide: PyodideInterface | undefined;
+  /** Information about the course data file used by the solver. */
+  courseInputFile: PyodideFileInfo;
 
-  /** Information about data files used by the solver. */
-  solverInputFiles: SolverInputFiles;
+  /** Information about the student data file used by the solver. */
+  studentInputFile: PyodideFileInfo;
 
   /** Configuration options for the solver. */
   solverConfig: SolverConfiguration;
@@ -102,62 +90,82 @@ interface CourseAssignmentSolverProps {
  * Meant to be wrapped in an error boundary.
  */
 function CourseAssignmentSolverBase({
-  pyodide,
-  solverInputFiles: { students: studentFileInfo, courses: courseFileInfo },
+  courseInputFile,
+  studentInputFile,
   solverConfig,
 }: CourseAssignmentSolverProps) {
   const theme = useTheme();
+  const [pyodideWorkerReady, setPyodideWorkerReady] = useState(false);
+  const [solveRequestID, setSolveRequestID] = useState("");
   const [courseAssignments, setCourseAssignments] = useState<[Course, Student[]][]>([]);
   // Bring error handling from effect to main component for error boundary
-  const [pyodideError, setPyodideError] = useState<unknown>();
-  if (pyodideError) throw pyodideError as Error;
+  const [pyodideError, setPyodideError] = useState<string>();
+  if (pyodideError) throw Error(pyodideError);
 
-  const allFilesLoaded = courseFileInfo.isLoaded && studentFileInfo.isLoaded;
+  const allFilesLoaded = courseInputFile.isLoaded && studentInputFile.isLoaded;
 
-  const loadingMessage = !pyodide
+  const loadingMessage = !pyodideWorkerReady
     ? "Loading solver..."
     : !allFilesLoaded
       ? "Upload files to determine course assignments"
       : "Finding optimal course assignments...";
-  const isWaitingOnPyodide = !pyodide || (allFilesLoaded && !courseAssignments.length);
+  const isWaitingOnPyodide =
+    !pyodideWorkerReady || (allFilesLoaded && !courseAssignments.length);
+
+  const handlePyodideWorkerMessage = useCallback(
+    (e: MessageEvent<WorkerResponse>) => {
+      if (e.data.type === "status") {
+        setPyodideWorkerReady(e.data.ready);
+        if (e.data.error !== null) {
+          setPyodideError(e.data.error);
+        }
+      } else if (e.data.type === "solve" && e.data.id === solveRequestID) {
+        if (e.data.error !== null) {
+          setPyodideError(e.data.error);
+        } else {
+          setCourseAssignments(e.data.assignments);
+        }
+      }
+    },
+    [solveRequestID],
+  );
+
+  useEffect(() => {
+    pyodideWorker.addEventListener("message", handlePyodideWorkerMessage);
+
+    return () => {
+      pyodideWorker.removeEventListener("message", handlePyodideWorkerMessage);
+    };
+  }, [handlePyodideWorkerMessage]);
+
+  useEffect(() => {
+    // Check that Pyodide worker is ready
+    pyodideWorker.postMessage({ id: crypto.randomUUID(), type: "status" });
+  }, []);
 
   useEffect(() => {
     // Rerun solver on updates to files
-    if (pyodide && allFilesLoaded) {
-      try {
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment, 
-                          @typescript-eslint/no-unsafe-call, 
-                          @typescript-eslint/no-unsafe-member-access */
-        const solverEntrypoint = pyodide.pyimport("computer_computer.file_entrypoint");
-        const assignmentsProxy =
-          solverEntrypoint.get_optimal_course_assignments_from_files(
-            courseFileInfo.path,
-            studentFileInfo.path,
-            solverConfig,
-          ) as PyProxy;
-        // To avoid memory leaks, don't use proxies
-        // See https://pyodide.org/en/stable/usage/type-conversions.html#type-translations-pyproxy-to-js
-        const assignmentsJS = assignmentsProxy.toJs({
-          create_pyproxies: false,
-          dict_converter: Object.fromEntries,
-        }) as [Course, Student[]][];
-        assignmentsJS.sort(([course1], [course2]) => {
-          if (course1.period !== course2.period) return course1.period - course2.period;
-          else if (course1.title.toUpperCase() < course2.title.toUpperCase()) return -1;
-          else if (course1.title.toUpperCase() > course2.title.toUpperCase()) return 1;
-          return 0;
-        });
-
-        setCourseAssignments(assignmentsJS);
-        assignmentsProxy.destroy();
-      } catch (error) {
-        console.log("caught error");
-        setPyodideError(error);
-      }
+    if (pyodideWorkerReady && allFilesLoaded) {
+      const id = crypto.randomUUID();
+      setSolveRequestID(id);
+      pyodideWorker.postMessage({
+        id: id,
+        type: "solve",
+        courseInputFile: courseInputFile,
+        studentInputFile: studentInputFile,
+        configuration: solverConfig,
+      });
     } else {
+      setSolveRequestID("");
       setCourseAssignments([]);
     }
-  }, [pyodide, allFilesLoaded, courseFileInfo, studentFileInfo, solverConfig]);
+  }, [
+    pyodideWorkerReady,
+    allFilesLoaded,
+    courseInputFile,
+    studentInputFile,
+    solverConfig,
+  ]);
 
   return (
     <Paper elevation={3} sx={{ padding: "0.5rem" }}>

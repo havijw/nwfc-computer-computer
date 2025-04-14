@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import SettingsIcon from "@mui/icons-material/Settings";
 import Box from "@mui/material/Box";
@@ -10,13 +10,11 @@ import Grid from "@mui/material/Grid2";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { PyodideInterface } from "pyodide";
 
 import logoURL from "/computer-computer-icon.jpg?url";
 import CourseAssignmentSolver from "./components/CourseAssignmentSolver.tsx";
 import TSVDropZone from "./components/TSVDropzone.tsx";
 import usePyodideTextFile from "./hooks/usePyodideTextFile.ts";
-import loadPyodideAndPackages from "./pyodide.ts";
 import AppTheme from "./theme.tsx";
 import PrivacyModal from "./modals/PrivacyModal.tsx";
 import CourseFileDescriptionModal from "./modals/CourseFileDescriptionModal.tsx";
@@ -33,35 +31,10 @@ export default function ComputerComputerApp() {
   const [solverSettingsOpen, setSolverSettingsOpen] = useState(false);
   const [solverConfig, setSolverConfig] = useState(defaultSolverConfiguration());
 
-  // TODO Extract the pyodide functionality to a web worker, post messages on file uploads,
-  //      and receive messages on updates to course assignments.
-  // All this is to prevent `loadPyodide` from running multiple times, which breaks things. If we
-  // don't protect it with a ref, it will be run every time the component refreshes (if not using
-  // an effect) or every time the component remounts (if using an effect with an empty dependency
-  // array). `React.StrictMode` demonstrates the breakage in either case.
-  const [pyodide, setPyodide] = useState<PyodideInterface>();
-  const loadPyodideRun = useRef(false);
-  useEffect(() => {
-    if (loadPyodideRun.current) return;
-    loadPyodideRun.current = true;
-    loadPyodideAndPackages()
-      .then((value) => {
-        setPyodide(value);
-      })
-      .catch((reason: unknown) => {
-        console.log("Loading pyodide and necessary packages failed.");
-        console.log(reason);
-      });
-  }, []);
-
-  const [courseFileInfo, courseFile, setCourseFile] = usePyodideTextFile(
-    "/data/courses.tsv",
-    pyodide,
-  );
-  const [studentFileInfo, studentFile, setStudentFile] = usePyodideTextFile(
-    "/data/students.tsv",
-    pyodide,
-  );
+  const [courseFileInfo, courseFile, setCourseFile] =
+    usePyodideTextFile("/data/courses.tsv");
+  const [studentFileInfo, studentFile, setStudentFile] =
+    usePyodideTextFile("/data/students.tsv");
 
   return (
     <AppTheme>
@@ -118,11 +91,8 @@ export default function ComputerComputerApp() {
           </Grid>
           <Grid size={12}>
             <CourseAssignmentSolver
-              pyodide={pyodide}
-              solverInputFiles={{
-                courses: courseFileInfo,
-                students: studentFileInfo,
-              }}
+              courseInputFile={courseFileInfo}
+              studentInputFile={studentFileInfo}
               solverConfig={solverConfig}
             />
           </Grid>
