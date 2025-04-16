@@ -1,5 +1,10 @@
 import { loadPyodide, type PyodideInterface } from "pyodide";
-import { type WorkerRequest } from "./workerTypes";
+import {
+  type WorkerRequest,
+  type WorkerStatusResponse,
+  type WorkerSolveResponse,
+  type WorkerFileResponse,
+} from "./workerTypes";
 import { PyProxy } from "pyodide/ffi";
 import { type Course, type Student } from "../models";
 
@@ -21,10 +26,21 @@ interface AnalyzePathResult {
   parentObject: any;
 }
 
+/** Global Pyodide instance. Used to determine whether the worker is "ready" for status
+ * responses, so should only be assigned once Pyodide and all dependencies are loaded.
+ */
 let pyodide: PyodideInterface | null = null;
-let loadError: unknown = null;
+/** Error due to loading Pyodide. */
+let loadError: string | null = null;
 
-async function loadPyodideWithPackages() {
+/** Load Pyodide instance and all package dependencies.
+ *
+ * Calls `loadPyodide`, so should only be called once!
+ *
+ * @returns Promise that resolves to a Pyodide instance ready for the solver to be
+ * imported and called.
+ */
+async function loadPyodideWithPackages(): Promise<PyodideInterface> {
   const pyodide = await loadPyodide();
   const pyversion = (await pyodide.runPythonAsync(
     `import sys; sys.version.split(" ")[0]`,
@@ -36,7 +52,6 @@ async function loadPyodideWithPackages() {
   if (import.meta.env.DEV) {
     console.log("Loading computer_computer");
     pyodide.FS.mkdirTree("/python/computer_computer");
-    // For some reason, import.meta.glob doesn't respect the project base
     const pythonModules = import.meta.glob("/python/computer_computer/*.py", {
       query: "?url",
     });
@@ -65,32 +80,49 @@ async function loadPyodideWithPackages() {
   return pyodide;
 }
 
+// Load Pyodide instance into global state and post message when ready.
 loadPyodideWithPackages()
   .then((pyodideWithPackages) => {
     pyodide = pyodideWithPackages;
-    postMessage({ id: crypto.randomUUID(), type: "status", ready: true, error: null });
+    postMessage({
+      id: crypto.randomUUID(),
+      type: "status",
+      ready: true,
+      error: null,
+    } as WorkerStatusResponse);
   })
   .catch((reason: unknown) => {
-    loadError = reason;
+    loadError = String(reason);
     postMessage({
       id: crypto.randomUUID(),
       type: "status",
       ready: false,
-      error: String(reason),
-    });
+      error: loadError,
+    } as WorkerStatusResponse);
   });
 
+/** Worker message handler. Refer to the `WorkerRequest` type for expected messages. */
 self.onmessage = (e: MessageEvent<WorkerRequest>) => {
+  /********** Status Request **********/
   if (e.data.type === "status") {
     postMessage({
       id: e.data.id,
       type: "status",
       ready: !!pyodide,
       error: loadError === null ? loadError : String(loadError),
-    });
+    } as WorkerStatusResponse);
+
+    /********** File Request **********/
   } else if (e.data.type === "file") {
     const file = e.data.file;
     const path = e.data.path;
+    const response: WorkerFileResponse = {
+      id: e.data.id,
+      type: "file",
+      path: path,
+      loaded: false,
+      error: null,
+    };
     if (pyodide) {
       const parentPath = path.split("/").slice(0, -1).join("/");
       // TODO remove these disables if Pyodide updates the FS type
@@ -107,53 +139,37 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
         file
           .text()
           .then((text) => {
-            if (pyodide) pyodide.FS.writeFile(path, text);
-            postMessage({
-              id: e.data.id,
-              type: "file",
-              path: path,
-              loaded: true,
-              error: null,
-            });
+            // Pyodide has already loaded due to check above, and will not be unloaded
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            pyodide!.FS.writeFile(path, text);
+            response.loaded = true;
           })
           .catch((reason: unknown) => {
-            postMessage({
-              id: e.data.id,
-              type: "file",
-              path: path,
-              loaded: false,
-              error: String(reason),
-            });
+            response.error = String(reason);
           });
       } else if (fileExists) {
         pyodide.FS.unlink(path);
-        postMessage({
-          id: e.data.id,
-          type: "file",
-          path: path,
-          loaded: false,
-          error: null,
-        });
       }
     } else {
-      postMessage({
-        id: e.data.id,
-        type: "file",
-        path: path,
-        loaded: false,
-        error: "Solver not yet loaded",
-      });
+      response.error = "Solver not yet loaded";
     }
+    postMessage(response);
+
+    /********** Solve Request **********/
     // Explicit is good here since we might add more cases in the future.
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   } else if (e.data.type === "solve") {
+    // Making a response with default values and then assigning them as we go doesn't
+    // work well here because the type system prevents us from making a solve response
+    // that has `assignments` and `error` null. It's easier to just post messages
+    // where appropriate. But make sure they're typed!
     if (!pyodide) {
       postMessage({
         id: e.data.id,
         type: "solve",
         assignments: null,
         error: "Solver not yet loaded",
-      });
+      } as WorkerSolveResponse);
     } else {
       try {
         /* eslint-disable @typescript-eslint/no-unsafe-assignment, 
@@ -183,7 +199,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
           type: "solve",
           assignments: assignmentsJS,
           error: null,
-        });
+        } as WorkerSolveResponse);
         assignmentsProxy.destroy();
       } catch (error) {
         postMessage({
@@ -191,7 +207,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
           type: "solve",
           assignments: null,
           error: String(error),
-        });
+        } as WorkerSolveResponse);
       }
     }
   }
