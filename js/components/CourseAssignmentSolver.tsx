@@ -96,6 +96,7 @@ function CourseAssignmentSolverBase({
 }: CourseAssignmentSolverProps) {
   const theme = useTheme();
   const [pyodideWorkerReady, setPyodideWorkerReady] = useState(false);
+  // Keep track of latest solve request so stale responses can be discarded.
   const [solveRequestID, setSolveRequestID] = useState("");
   const [courseAssignments, setCourseAssignments] = useState<[Course, Student[]][]>([]);
   // Bring error handling from effect to main component for error boundary
@@ -119,6 +120,7 @@ function CourseAssignmentSolverBase({
         if (e.data.error !== null) {
           setPyodideError(e.data.error);
         }
+        // Ignore stale responses
       } else if (e.data.type === "solve" && e.data.id === solveRequestID) {
         if (e.data.error !== null) {
           setPyodideError(e.data.error);
@@ -144,7 +146,7 @@ function CourseAssignmentSolverBase({
   }, []);
 
   useEffect(() => {
-    // Rerun solver on updates to files
+    // Rerun solver on updates to files and configuration
     if (pyodideWorkerReady && allFilesLoaded) {
       const id = crypto.randomUUID();
       setSolveRequestID(id);
