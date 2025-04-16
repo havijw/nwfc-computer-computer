@@ -36,8 +36,8 @@ function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
     >
       <Stack>
         <Typography sx={{ textAlign: "center" }}>
-          Solving optimal course assignments failed. Check settings and files uploaded,
-          reload page, and try again.
+          Solving optimal course assignments failed. Changes files uploaded or settings
+          to try again, or reload page.
         </Typography>
         <Accordion
           sx={{
@@ -63,8 +63,11 @@ function CourseAssignmentFallbackComponent({ error }: { error: Error }) {
             <Typography sx={{ fontWeight: "bold" }}>Full Error</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Typography sx={{ overflow: "scroll" }}>
-              <pre>{error.message}</pre>
+            <Typography
+              component="pre"
+              sx={{ overflow: "scroll", fontFamily: "Monospace" }}
+            >
+              {error.message}
             </Typography>
           </AccordionDetails>
         </Accordion>

@@ -102,7 +102,12 @@ loadPyodideWithPackages()
   });
 
 /** Worker message handler. Refer to the `WorkerRequest` type for expected messages. */
-self.onmessage = (e: MessageEvent<WorkerRequest>) => {
+self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
+  if (import.meta.env.DEV) {
+    // In dev, log all messages sent to worker
+    console.log("<<< Worker recv:", e.data);
+  }
+
   /********** Status Request **********/
   if (e.data.type === "status") {
     postMessage({
@@ -133,22 +138,23 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
         path,
       ) as AnalyzePathResult;
       if (file) {
-        if (!parentExists) {
-          pyodide.FS.mkdirTree(parentPath);
+        try {
+          if (!parentExists) {
+            pyodide.FS.mkdirTree(parentPath);
+          }
+          const fileText = await file.text();
+          pyodide.FS.writeFile(path, fileText);
+          response.loaded = true;
+        } catch (reason: unknown) {
+          response.error = String(reason);
         }
-        file
-          .text()
-          .then((text) => {
-            // Pyodide has already loaded due to check above, and will not be unloaded
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            pyodide!.FS.writeFile(path, text);
-            response.loaded = true;
-          })
-          .catch((reason: unknown) => {
-            response.error = String(reason);
-          });
       } else if (fileExists) {
-        pyodide.FS.unlink(path);
+        try {
+          pyodide.FS.unlink(path);
+          response.loaded = false;
+        } catch (reason: unknown) {
+          response.error = String(reason);
+        }
       }
     } else {
       response.error = "Solver not yet loaded";
