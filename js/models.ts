@@ -59,6 +59,7 @@ export interface SolverConfiguration {
   even_student_distribution_weight: number;
 }
 
+/** Returns the default solver configuration. */
 export function defaultSolverConfiguration(): SolverConfiguration {
   return {
     maximum_students_per_teacher: 12,

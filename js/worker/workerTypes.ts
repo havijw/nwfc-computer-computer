@@ -1,4 +1,4 @@
-import { type PyodideFileInfo } from "../hooks/usePyodideTextFile";
+import { type PyodideFileInfo } from "../hooks/usePyodideWorkerFile";
 import { type Course, type Student, type SolverConfiguration } from "../models";
 
 /** Base type for messages to and from the worker. */

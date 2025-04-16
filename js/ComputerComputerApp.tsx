@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import logoURL from "/computer-computer-icon.jpg?url";
 import CourseAssignmentSolver from "./components/CourseAssignmentSolver.tsx";
 import TSVDropZone from "./components/TSVDropzone.tsx";
-import usePyodideTextFile from "./hooks/usePyodideTextFile.ts";
+import usePyodideWorkerFile from "./hooks/usePyodideWorkerFile.ts";
 import AppTheme from "./theme.tsx";
 import PrivacyModal from "./modals/PrivacyModal.tsx";
 import CourseFileDescriptionModal from "./modals/CourseFileDescriptionModal.tsx";
@@ -32,9 +32,9 @@ export default function ComputerComputerApp() {
   const [solverConfig, setSolverConfig] = useState(defaultSolverConfiguration());
 
   const [courseFileInfo, courseFile, setCourseFile] =
-    usePyodideTextFile("/data/courses.tsv");
+    usePyodideWorkerFile("/data/courses.tsv");
   const [studentFileInfo, studentFile, setStudentFile] =
-    usePyodideTextFile("/data/students.tsv");
+    usePyodideWorkerFile("/data/students.tsv");
 
   return (
     <AppTheme>

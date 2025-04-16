@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import { ErrorBoundary } from "react-error-boundary";
 
 import type { Course, SolverConfiguration, Student } from "../models";
-import type { PyodideFileInfo } from "../hooks/usePyodideTextFile";
+import type { PyodideFileInfo } from "../hooks/usePyodideWorkerFile";
 import pyodideWorker from "../worker/pyodideWorkerInstance";
 import { type WorkerResponse } from "../worker/workerTypes";
 

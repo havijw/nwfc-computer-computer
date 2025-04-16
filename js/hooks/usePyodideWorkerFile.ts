@@ -11,19 +11,20 @@ export interface PyodideFileInfo {
   isLoaded: boolean;
 }
 
-/** React hook to synchronize a state file object with a location in Pyodide's file system.
+/** React hook to synchronize a state file object with a location in Pyodide's file
+ * system through the Pyodide worker.
  *
  * Changes to the state file object are reflected in Pyodide's file system, but not vice-versa.
  *
- * @param filepath The path where the file should be loaded in Pyodide's file system.
+ * @param path The path where the file should be loaded in Pyodide's file system.
  *
  * @returns Array with three objects:
  *   - `PyodideFileInfo`: Information about the file in Pyodide's file system.
  *   - `File`: State whose changes will be reflected in Pyodide's file system.
  *   - `(file: File) => void`: Function to update the state `File` object.
  */
-export default function usePyodideTextFile(
-  filepath: string,
+export default function usePyodideWorkerFile(
+  path: string,
 ): [
   PyodideFileInfo,
   File | undefined,
@@ -33,15 +34,17 @@ export default function usePyodideTextFile(
   const [isFileLoaded, setIsFileLoaded] = useState(false);
   const [isPyodideLoaded, setIsPyodideLoaded] = useState(false);
 
+  // Keep track of whether Pyodide is loaded to know whether it is possible to send
+  // changes to the worker.
   const handlePyodideWorkerMessage = useCallback(
     (e: MessageEvent<WorkerResponse>) => {
       if (e.data.type === "status") {
         setIsPyodideLoaded(e.data.ready);
-      } else if (e.data.type === "file" && e.data.path == filepath) {
+      } else if (e.data.type === "file" && e.data.path == path) {
         setIsFileLoaded(e.data.loaded);
       }
     },
-    [filepath],
+    [path],
   );
 
   useEffect(() => {
@@ -52,20 +55,21 @@ export default function usePyodideTextFile(
     };
   }, [handlePyodideWorkerMessage]);
 
+  // Update the worker on changes as long as Pyodide is loaded.
   useEffect(() => {
     if (isPyodideLoaded) {
       pyodideWorker.postMessage({
         id: crypto.randomUUID(),
         type: "file",
         file: file,
-        path: filepath,
+        path: path,
       });
     }
-  }, [isPyodideLoaded, file, filepath]);
+  }, [isPyodideLoaded, file, path]);
 
   const fileInfo = useMemo<PyodideFileInfo>(
-    () => ({ path: filepath, isLoaded: isFileLoaded }),
-    [filepath, isFileLoaded],
+    () => ({ path: path, isLoaded: isFileLoaded }),
+    [path, isFileLoaded],
   );
 
   return [fileInfo, file, setFile];
