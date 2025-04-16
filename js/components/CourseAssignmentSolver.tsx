@@ -149,7 +149,8 @@ function CourseAssignmentSolverBase({
   }, []);
 
   useEffect(() => {
-    // Rerun solver on updates to files and configuration
+    // Reset course assignments so outdated assignments are not shown
+    setCourseAssignments([]);
     if (pyodideWorkerReady && allFilesLoaded) {
       const id = crypto.randomUUID();
       setSolveRequestID(id);
@@ -162,7 +163,6 @@ function CourseAssignmentSolverBase({
       });
     } else {
       setSolveRequestID("");
-      setCourseAssignments([]);
     }
   }, [
     pyodideWorkerReady,
