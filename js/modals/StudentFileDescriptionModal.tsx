@@ -21,8 +21,8 @@ export default function StudentFileDescriptionModal({ open, setOpen }: ModalProp
     >
       <Typography variant="body1">
         Student and preference informaiton is uploaded in a spreadsheet in TSV format
-        with the columns shown below. The column titles dont&apos;t need to tbe the
-        same, but the order of the columns should match the example.
+        with the columns shown below. The column titles dont&apos;t need to be the same,
+        but the order of the columns should match the example.
       </Typography>
       <ul style={{ marginTop: "0.5rem" }}>
         <li>
