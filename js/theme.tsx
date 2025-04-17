@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 
 /** Theme for the app. */
 const theme = createTheme({
+  cssVariables: true,
   colorSchemes: {
     dark: true,
   },

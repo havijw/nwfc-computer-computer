@@ -45,8 +45,7 @@ export default function TSVDropZone({
     height: "5rem",
     display: "flex",
     color: file ? theme.palette.text.primary : theme.palette.text.secondary,
-    bgcolor:
-      theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[200],
+    bgcolor: theme.palette.action.selected,
     border: 2,
     borderColor: theme.palette.divider,
     borderStyle: "dashed",
@@ -89,7 +88,10 @@ export default function TSVDropZone({
                 variant="outlined"
                 color="info"
                 component="label"
-                sx={dropzoneStyles}
+                sx={{
+                  ...dropzoneStyles,
+                  ":hover": { bgcolor: theme.palette.action.focus },
+                }}
               >
                 <input {...getInputProps()} />
                 <Stack alignItems="center">

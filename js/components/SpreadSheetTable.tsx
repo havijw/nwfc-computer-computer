@@ -13,8 +13,7 @@ const SpreadSheetTable = styled(Table)(({ theme }: { theme: Theme }) => ({
   "& th": {
     borderLeft: "1px solid",
     borderColor: theme.palette.divider,
-    backgroundColor:
-      theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.grey[200],
+    backgroundColor: theme.palette.action.selected,
   },
   "& td": {
     borderLeft: "1px solid",

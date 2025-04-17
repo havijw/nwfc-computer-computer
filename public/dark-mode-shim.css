@@ -1,0 +1,15 @@
+/* Shim to prevent dark mode "flicker". Using CSS variables and dark mode support in MUI
+ * prevents the flicker once the UI bundle is loaded, but in Safari and Firefox (at 
+ * least in dev) there is still a flicker before the bundle loads. This shim is used to
+ * show a dark background (that matches the MUI background color) even before the bundle
+ * loads, completely eliminating the flicker.
+ */
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: rbg(18, 18, 18);
+  }
+}
