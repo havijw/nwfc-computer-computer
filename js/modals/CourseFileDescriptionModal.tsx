@@ -35,7 +35,7 @@ export default function CourseFileDescriptionModal({ open, setOpen }: ModalProps
         </li>
       </ul>
       <TableContainer>
-        <SpreadSheetTable aria-label="teacher-file-spreadsheet-format">
+        <SpreadSheetTable aria-label="Courses spreadsheet format">
           <TableHead>
             <TableRow>
               <TableCell>Period</TableCell>

@@ -33,6 +33,7 @@ export default function PrivacyModal({ open, setOpen }: ModalProps) {
             Privacy Policy
           </Typography>
           <IconButton
+            aria-label="close"
             onClick={() => {
               setOpen(false);
             }}

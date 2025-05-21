@@ -42,7 +42,7 @@ export default function StudentFileDescriptionModal({ open, setOpen }: ModalProp
       </ul>
       <TableContainer>
         <SpreadSheetTable
-          aria-label="student-file-spreadsheet-format"
+          aria-label="Student spreadsheet format"
           sx={{ borderRadius: 2 }}
         >
           <TableHead>

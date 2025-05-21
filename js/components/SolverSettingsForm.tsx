@@ -40,6 +40,8 @@ function SolverConfigFieldSlider({
       <Stack direction="row" alignItems="center" spacing={0}>
         <Typography id={sliderLabelID + "-slider-label"}>{title}</Typography>
         <IconButton
+          title="Show description"
+          aria-label="Show description"
           onClick={() => {
             setDescriptionShown((descriptionShown) => !descriptionShown);
           }}

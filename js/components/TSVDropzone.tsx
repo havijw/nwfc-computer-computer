@@ -57,7 +57,11 @@ export default function TSVDropZone({
     <Paper elevation={3} sx={{ padding: "0.5rem" }}>
       <Stack direction="row" alignItems="center" justifyContent="center" spacing={-0.5}>
         <Typography align="center">{title}</Typography>
-        <IconButton onClick={openDescription} aria-label={`Open ${title} description`}>
+        <IconButton
+          title={`Open ${title.toLowerCase()} file description`}
+          aria-label={`Open ${title.toLowerCase()} file description`}
+          onClick={openDescription}
+        >
           <HelpOutlineIcon fontSize="small" />
         </IconButton>
       </Stack>
@@ -67,7 +71,8 @@ export default function TSVDropZone({
             <BorderAllIcon />
             <Typography flexGrow={1}>{file.name}</Typography>
             <IconButton
-              aria-label="delete"
+              title="Remove file"
+              aria-label="Remove file"
               onClick={() => {
                 setFile(undefined);
               }}

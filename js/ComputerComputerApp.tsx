@@ -51,7 +51,8 @@ export default function ComputerComputerApp() {
             NWFC Computer-Computer
           </Typography>
           <IconButton
-            aria-label="settings"
+            title="Show solver settings"
+            aria-label="Show solver settings"
             onClick={() => {
               setSolverSettingsOpen(true);
             }}
@@ -109,6 +110,8 @@ export default function ComputerComputerApp() {
             &copy;<a href="https://jackhaviland.com">Jack Haviland</a> 2025
           </Box>
           <Button
+            title="Show privacy information"
+            aria-label="Show privacy information"
             sx={{ mx: "-6px" }}
             onClick={() => {
               setPrivacyModalOpen(true);

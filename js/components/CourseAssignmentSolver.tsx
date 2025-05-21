@@ -229,10 +229,25 @@ function CourseAssignmentSolverBase({
               <Typography variant="h6" flexGrow={1}>
                 Course Assignments
               </Typography>
-              <Tooltip title="Download TSV">
+              <Tooltip
+                title="Download TSV"
+                describeChild
+                slotProps={{
+                  popper: {
+                    modifiers: [
+                      {
+                        name: "offset",
+                        options: {
+                          offset: [0, -9],
+                        },
+                      },
+                    ],
+                  },
+                }}
+              >
                 <Button
-                  variant="outlined"
                   aria-label="Download TSV"
+                  variant="outlined"
                   href={tsvDataURI}
                   download="course-assignments.tsv"
                 >
