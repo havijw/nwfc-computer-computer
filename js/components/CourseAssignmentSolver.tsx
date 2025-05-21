@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
+import Button from "@mui/material/Button";
+import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -10,6 +12,7 @@ import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -17,6 +20,43 @@ import type { Course, SolverConfiguration, Student } from "../models";
 import type { PyodideFileInfo } from "../hooks/usePyodideWorkerFile";
 import pyodideWorker from "../worker/pyodideWorkerInstance";
 import { type WorkerResponse } from "../worker/workerTypes";
+
+/** Convert a column index to Excel-style column labels (A, B, ..., Z, AA, AB, ...). */
+function getExcelColumnLabel(column: number): string {
+  let label = "";
+  let n = column + 1;
+  while (n > 0) {
+    const rem = (n - 1) % 26;
+    label = String.fromCharCode(65 + rem) + label;
+    n = Math.floor((n - 1) / 26);
+  }
+  return label;
+}
+
+/** Create a nicely-formatted TSV file that can be imported to Excel or Google Sheets. */
+function getTSVTextContent(courseAssignments: [Course, Student[]][]): string {
+  const maxStudentsInCourse = Math.max(
+    ...courseAssignments.map(([, students]) => students.length),
+  );
+  const rows = [
+    courseAssignments.map(([course]) => course.title), // header
+    courseAssignments.map(([course]) => course.teachers.join(", ")), // teachers
+    courseAssignments.map(([course]) => `Period ${String(course.period)}`), // period
+    // formula showing the number of students in each course
+    courseAssignments.map((_, i) => {
+      const columnLabel = getExcelColumnLabel(i);
+      return `=COUNTA(${columnLabel}5:${columnLabel}${String(maxStudentsInCourse + 4)})`;
+    }),
+  ];
+  // Each row is the names of student `i` in each course
+  for (let i = 0; i < maxStudentsInCourse; i++) {
+    const row = courseAssignments.map(([, students]) =>
+      students[i] ? students[i].name : "",
+    );
+    rows.push(row);
+  }
+  return rows.map((row) => row.join("\t")).join("\n");
+}
 
 /** Fallback component for error state of `CourseAssignment` component.
  *
@@ -106,6 +146,14 @@ function CourseAssignmentSolverBase({
   const [pyodideError, setPyodideError] = useState<string>();
   if (pyodideError) throw Error(pyodideError);
 
+  // Data URI for the TSV download button
+  const tsvDataURI = useMemo(() => {
+    const tsvBlob = new Blob([getTSVTextContent(courseAssignments)], {
+      type: "text/tab-separated-values",
+    });
+    return URL.createObjectURL(tsvBlob);
+  }, [courseAssignments]);
+
   const allFilesLoaded = courseInputFile.isLoaded && studentInputFile.isLoaded;
 
   const loadingMessage = !pyodideWorkerReady
@@ -176,6 +224,23 @@ function CourseAssignmentSolverBase({
     <Paper elevation={3} sx={{ padding: "0.5rem" }}>
       {courseAssignments.length ? (
         <Grid container spacing={1}>
+          <Grid size={12}>
+            <Stack direction="row" alignItems="center">
+              <Typography variant="h6" flexGrow={1}>
+                Course Assignments
+              </Typography>
+              <Tooltip title="Download TSV">
+                <Button
+                  variant="outlined"
+                  aria-label="Download TSV"
+                  href={tsvDataURI}
+                  download="course-assignments.tsv"
+                >
+                  <DownloadIcon fontSize="small" />
+                </Button>
+              </Tooltip>
+            </Stack>
+          </Grid>
           {courseAssignments.map(([course, students]) => (
             <Grid size={{ xs: 6, md: 3 }} key={course.title + String(course.period)}>
               <Paper sx={{ padding: "0.5rem" }}>
