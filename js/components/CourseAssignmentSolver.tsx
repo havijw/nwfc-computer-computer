@@ -6,9 +6,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Button from "@mui/material/Button";
 import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
@@ -20,6 +18,7 @@ import type { Course, SolverConfiguration, Student } from "../models";
 import type { PyodideFileInfo } from "../hooks/usePyodideWorkerFile";
 import pyodideWorker from "../worker/pyodideWorkerInstance";
 import { type WorkerResponse } from "../worker/workerTypes";
+import CourseAssignmentDisplay from "./CourseAssignmentDisplay";
 
 /** Convert a column index to Excel-style column labels (A, B, ..., Z, AA, AB, ...). */
 function getExcelColumnLabel(column: number): string {
@@ -223,72 +222,51 @@ function CourseAssignmentSolverBase({
   return (
     <Paper elevation={3} sx={{ padding: "0.5rem" }}>
       {courseAssignments.length ? (
-        <Grid container spacing={1}>
-          <Grid size={12}>
-            <Stack direction="row" alignItems="center">
-              <Typography variant="h6" flexGrow={1}>
-                Course Assignments
-              </Typography>
-              <Tooltip
-                title="Download TSV"
-                describeChild
-                slotProps={{
-                  popper: {
-                    modifiers: [
-                      {
-                        name: "offset",
-                        options: {
-                          offset: [0, -9],
-                        },
+        <Stack spacing={1}>
+          <Stack direction="row" alignItems="center">
+            <Typography variant="h5" flexGrow={1}>
+              Course Assignments
+            </Typography>
+            <Tooltip
+              title="Download TSV"
+              describeChild
+              slotProps={{
+                popper: {
+                  modifiers: [
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, -9],
                       },
-                    ],
-                  },
-                }}
+                    },
+                  ],
+                },
+              }}
+            >
+              <Button
+                aria-label="Download TSV"
+                variant="outlined"
+                size="small"
+                href={tsvDataURI}
+                download="course-assignments.tsv"
               >
-                <Button
-                  aria-label="Download TSV"
-                  variant="outlined"
-                  href={tsvDataURI}
-                  download="course-assignments.tsv"
-                >
-                  <DownloadIcon fontSize="small" />
-                </Button>
-              </Tooltip>
-            </Stack>
-          </Grid>
-          {courseAssignments.map(([course, students]) => (
-            <Grid size={{ xs: 6, md: 3 }} key={course.title + String(course.period)}>
-              <Paper sx={{ padding: "0.5rem" }}>
-                <Box sx={{ typography: "subtitle" }}>
-                  P{course.period}. {course.title}
-                </Box>
-                <p style={{ marginTop: "0.25rem", marginBottom: "0.25rem" }}>
-                  <i>{course.teachers.join(", ")}</i>
-                  <br />
-                  {students.length} students:
-                </p>
-                <ul style={{ marginTop: 0 }}>
-                  {students.map((student) => (
-                    <li key={student.name}>{student.name}</li>
-                  ))}
-                </ul>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      ) : (
-        <Box>
-          <Stack
-            direction="row"
-            spacing={1}
-            justifyContent="center"
-            alignItems="center"
-            sx={{ color: theme.palette.text.secondary }}
-          >
-            {isWaitingOnPyodide && <CircularProgress size="1em" color="inherit" />}
-            <Typography sx={{ textAlign: "center" }}>{loadingMessage}</Typography>
+                <DownloadIcon fontSize="small" />
+              </Button>
+            </Tooltip>
           </Stack>
-        </Box>
+          <CourseAssignmentDisplay courseAssignments={courseAssignments} />
+        </Stack>
+      ) : (
+        <Stack
+          direction="row"
+          spacing={1}
+          justifyContent="center"
+          alignItems="center"
+          sx={{ color: theme.palette.text.secondary }}
+        >
+          {isWaitingOnPyodide && <CircularProgress size="1em" color="inherit" />}
+          <Typography sx={{ textAlign: "center" }}>{loadingMessage}</Typography>
+        </Stack>
       )}
     </Paper>
   );
