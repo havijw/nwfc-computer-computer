@@ -70,11 +70,11 @@ export type WorkerRequest =
   | WorkerFileRequest;
 
 /********** Responses **********/
-/* Many of the response types are structured to provide helpful type narrowing between
- * success and failure types. For instance, a status response is guaranteed by the type
- * system to have a non-null error if and only if the `ready` property is false.
+/* Some of the response types are structured to provide helpful type narrowing between
+ * success and failure types. For instance, a solve response is guaranteed by the type
+ * system to have a non-null error if and only if `assignments` is null.
  * This means elsewhere, we can check for a non-null error, and in the else block,
- * assume that the solver is ready. The solve response type also uses this structure.
+ * assume that assignments are present.
  */
 
 interface WorkerStatusResponseBase extends WorkerMessage {
@@ -93,10 +93,13 @@ interface WorkerStatusResponseReady extends WorkerStatusResponseBase {
   error: null;
 }
 
-/** Response when the solver is not ready yet (or due to an error in loading it). */
+/** Response when the solver is not ready yet (or due to an error in loading it).
+ *
+ * `error` is non-null when the solver failed to load, and null while it's still
+ * loading.
+ */
 interface WorkerStatusResponseNotReady extends WorkerStatusResponseBase {
   ready: false;
-  error: string;
 }
 
 /** Response with status of the worker: ready for solving or not.

@@ -1,8 +1,7 @@
 import { loadPyodide, type PyodideInterface } from "pyodide";
 import {
   type WorkerRequest,
-  type WorkerStatusResponse,
-  type WorkerSolveResponse,
+  type WorkerResponse,
   type WorkerFileResponse,
 } from "./workerTypes";
 import { PyProxy } from "pyodide/ffi";
@@ -10,28 +9,17 @@ import { type Course, type Student } from "../models";
 
 console.log("Starting pyodide web worker");
 
-// TODO remove this type if pyodide updates the FS type
-// See https://github.com/pyodide/pyodide/issues/5546
-interface AnalyzePathResult {
-  isRoot: boolean;
-  exists: boolean;
-  error: Error;
-  name: string;
-  path: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  object: any;
-  parentExists: boolean;
-  parentPath: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parentObject: any;
-}
-
 /** Global Pyodide instance. Used to determine whether the worker is "ready" for status
  * responses, so should only be assigned once Pyodide and all dependencies are loaded.
  */
 let pyodide: PyodideInterface | null = null;
 /** Error due to loading Pyodide. */
 let loadError: string | null = null;
+
+/** Type-safe wrapper around `postMessage`. */
+function postResponse(response: WorkerResponse): void {
+  postMessage(response);
+}
 
 /** Load Pyodide instance and all package dependencies.
  *
@@ -84,21 +72,21 @@ async function loadPyodideWithPackages(): Promise<PyodideInterface> {
 loadPyodideWithPackages()
   .then((pyodideWithPackages) => {
     pyodide = pyodideWithPackages;
-    postMessage({
+    postResponse({
       id: crypto.randomUUID(),
       type: "status",
       ready: true,
       error: null,
-    } as WorkerStatusResponse);
+    });
   })
   .catch((reason: unknown) => {
     loadError = String(reason);
-    postMessage({
+    postResponse({
       id: crypto.randomUUID(),
       type: "status",
       ready: false,
       error: loadError,
-    } as WorkerStatusResponse);
+    });
   });
 
 /** Worker message handler. Refer to the `WorkerRequest` type for expected messages. */
@@ -110,12 +98,11 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
 
   /********** Status Request **********/
   if (e.data.type === "status") {
-    postMessage({
-      id: e.data.id,
-      type: "status",
-      ready: !!pyodide,
-      error: loadError === null ? loadError : String(loadError),
-    } as WorkerStatusResponse);
+    if (pyodide) {
+      postResponse({ id: e.data.id, type: "status", ready: true, error: null });
+    } else {
+      postResponse({ id: e.data.id, type: "status", ready: false, error: loadError });
+    }
 
     /********** File Request **********/
   } else if (e.data.type === "file") {
@@ -130,13 +117,7 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
     };
     if (pyodide) {
       const parentPath = path.split("/").slice(0, -1).join("/");
-      // TODO remove these disables if Pyodide updates the FS type
-      // See https://github.com/pyodide/pyodide/issues/5546
-      // @ts-expect-error Pyodide doesn't have the right signature for FS
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      const { parentExists, exists: fileExists } = pyodide.FS.analyzePath(
-        path,
-      ) as AnalyzePathResult;
+      const { parentExists, exists: fileExists } = pyodide.FS.analyzePath(path);
       if (file) {
         try {
           if (!parentExists) {
@@ -159,7 +140,7 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
     } else {
       response.error = "Solver not yet loaded";
     }
-    postMessage(response);
+    postResponse(response);
 
     /********** Solve Request **********/
     // Explicit is good here since we might add more cases in the future.
@@ -170,12 +151,12 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
     // that has `assignments` and `error` null. It's easier to just post messages
     // where appropriate. But make sure they're typed!
     if (!pyodide) {
-      postMessage({
+      postResponse({
         id: e.data.id,
         type: "solve",
         assignments: null,
         error: "Solver not yet loaded",
-      } as WorkerSolveResponse);
+      });
     } else {
       try {
         /* eslint-disable @typescript-eslint/no-unsafe-assignment, 
@@ -200,20 +181,20 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
           else if (course1.title.toUpperCase() > course2.title.toUpperCase()) return 1;
           return 0;
         });
-        postMessage({
+        postResponse({
           id: e.data.id,
           type: "solve",
           assignments: assignmentsJS,
           error: null,
-        } as WorkerSolveResponse);
+        });
         assignmentsProxy.destroy();
       } catch (error) {
-        postMessage({
+        postResponse({
           id: e.data.id,
           type: "solve",
           assignments: null,
           error: String(error),
-        } as WorkerSolveResponse);
+        });
       }
     }
   }
