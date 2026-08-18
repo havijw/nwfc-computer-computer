@@ -233,11 +233,8 @@ class ComputerComputerSolver:
         self,
         first_choice_courses: Mapping[Student, Iterable[Course]],
         second_choice_courses: Mapping[Student, Iterable[Course]],
-        **kwargs,
     ) -> dict[Course, list[Student]]:
         """Find the optimal assignment of students to courses given student preferences.
-
-        kwargs are passed to `scipy.optimize.milp` as `options`.
 
         Raises:
             RuntimeError: If the optimizer fails for any reason (infeasibility is most common).
@@ -284,7 +281,6 @@ class ComputerComputerSolver:
             integrality=integrality,
             bounds=Bounds(lb=lower_bounds, ub=upper_bounds),
             constraints=self.constraints,
-            options=kwargs,
         )
         if not result.success:
             if result.status == 1:
